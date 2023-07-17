@@ -204,10 +204,7 @@
         "per_queue": {
           "exampleQueueSid": {
             "require_disposition": true,
-            "dispositions": [
-              "Promotional Sale",
-              "Renewal"
-            ]
+            "dispositions": ["Promotional Sale", "Renewal"]
           }
         }
       },
@@ -227,6 +224,11 @@
       },
       "park_interaction": {
         "enabled": true
+      },
+      "alert_tma": {
+        "enabled": false,
+        "voice_max_duration": 10,
+        "whatsapp_max_duration": 10
       }
     }
   }
