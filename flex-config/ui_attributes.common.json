@@ -227,8 +227,14 @@
       },
       "alert_tma": {
         "enabled": false,
-        "voice_max_duration": 10,
-        "whatsapp_max_duration": 10
+        "voice_max_duration": 120,
+        "whatsapp_max_duration": 300
+      },
+      "break_exceeded": {
+        "enabled": true,
+        "timeoutActivities": {
+          "Break": { "time": 60 }
+        }
       }
     }
   }

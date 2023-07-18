@@ -3,8 +3,8 @@ import AlertTmaConfig from './types/ServiceConfiguration';
 
 const {
   enabled = false,
-  voice_max_duration = 10,
-  whatsapp_max_duration = 10,
+  voice_max_duration = 120,
+  whatsapp_max_duration = 300,
 } = (getFeatureFlags()?.features?.alert_tma as AlertTmaConfig) || {};
 
 export const isFeatureEnabled = () => {
