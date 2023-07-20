@@ -79,8 +79,6 @@ export const getUpdatedParticipantDetails = async (
 
   const conversationParticipants = Array.from(conversation?.participants.values());
 
-  console.log('getParticipantDetails', conversationParticipants, intertactionParticipants);
-
   conversationParticipants.forEach((conversationParticipant) => {
     const intertactionParticipant = intertactionParticipants.find(
       (participant) => participant.mediaProperties?.sid === conversationParticipant.source.sid,
