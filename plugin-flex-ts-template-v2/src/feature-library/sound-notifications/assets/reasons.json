@@ -1,0 +1,21 @@
+{
+  "data": [
+    {
+      "topic": "Cliente Logcomex",
+      "options": [
+        "Problemas",
+        "Dúvidas",
+        "Solicitação de Serviços",
+        "Solicitação Geral"
+      ]
+    },
+    {
+      "topic": "Não cliente Logcomex",
+      "options": [
+        "Orçamento",
+        "Dúvidas",
+        "Apresentação"
+      ]
+    }
+  ]
+}

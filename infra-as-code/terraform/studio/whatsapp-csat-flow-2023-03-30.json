@@ -1,0 +1,69 @@
+{
+  "description": "A New Flow",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "next": "getClientInformation",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingConversationMessage"
+        },
+        {
+          "event": "incomingRequest"
+        },
+        {
+          "event": "incomingParent"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "name": "getClientInformation",
+      "type": "run-function",
+      "transitions": [
+        {
+          "event": "success"
+        },
+        {
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZS94a60054fb8b17808bdccffc44d1d2d0",
+        "environment_sid": "ZE59c5da4f5ff7e98f2ce35f39df892e5d",
+        "offset": {
+          "x": 10,
+          "y": 210
+        },
+        "function_sid": "ZHb6dbbfa91efb571020a5d4cd2bddf801",
+        "parameters": [
+          {
+            "value": "phone",
+            "key": "typeSearch"
+          },
+          {
+            "value": "{{trigger.message.ChannelAttributes.from}}",
+            "key": "clientEmail"
+          }
+        ],
+        "url": "https://serverless-functions-4443-dev.twil.io/hubspot-integration/search-client"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}

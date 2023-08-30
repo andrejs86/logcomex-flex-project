@@ -1,6 +1,6 @@
 {
   "name": "plugin-flex-ts-template-v2",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "test:watch": "jest --watch",
@@ -20,11 +20,11 @@
   },
   "dependencies": {
     "@emoji-mart/react": "^1.1.1",
-    "@twilio-paste/core": "^17.0.1",
-    "@twilio-paste/icons": "^9.4.2",
+    "@twilio-paste/core": "^17.7.0",
+    "@twilio-paste/icons": "^9.4.3",
     "@twilio/flex-dev-utils": "^6.1.1",
     "@twilio/flex-plugin-scripts": "6.1.1",
-    "audio-react-recorder": "^1.0.5",
+    "audio-react-recorder": "1.0.5",
     "emoji-mart": "^5.5.2",
     "lodash": "^4.17.20",
     "luxon": "^3.1.1",

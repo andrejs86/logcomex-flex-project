@@ -1,0 +1,2467 @@
+{
+  "description": "Flow Voice [OFFICIAL]",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "event": "incomingMessage"
+        },
+        {
+          "next": "set_location",
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingConversationMessage"
+        },
+        {
+          "event": "incomingRequest"
+        },
+        {
+          "event": "incomingParent"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 2330,
+          "y": -880
+        }
+      }
+    },
+    {
+      "name": "GetClientInformation",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "setLanguageHubspot",
+          "event": "success"
+        },
+        {
+          "next": "get_client_ddi",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 2470,
+          "y": -420
+        },
+        "method": "POST",
+        "content_type": "application/json;charset=utf-8",
+        "body": "{\n\"typeSearch\": \"phone\",\n\"clientEmail\": \" {{trigger.call.From}} \"\n}",
+        "url": "https://serverless-functions-4443-dev.twil.io/hubspot-integration/search-client"
+      }
+    },
+    {
+      "name": "get_language_client",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "boas_vindas_Portugues",
+          "event": "noMatch"
+        },
+        {
+          "next": "boas_vindas_Portugues",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "PORTUGUÊS",
+              "arguments": ["{{flow.variables.language}}"],
+              "type": "equal_to",
+              "value": "BR"
+            }
+          ]
+        },
+        {
+          "next": "boas_vindas_Espanhol",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "ESPANHOL",
+              "arguments": ["{{flow.variables.language}}"],
+              "type": "equal_to",
+              "value": "AR"
+            }
+          ]
+        },
+        {
+          "next": "boas_vindas_Ingles",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "INGLÊS",
+              "arguments": ["{{flow.variables.language}}"],
+              "type": "equal_to",
+              "value": "US"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.language}}",
+        "offset": {
+          "x": 2380,
+          "y": 1480
+        }
+      }
+    },
+    {
+      "name": "get_client_ddi",
+      "type": "run-function",
+      "transitions": [
+        {
+          "next": "boas_vindas_Portugues",
+          "event": "success"
+        },
+        {
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZS94a60054fb8b17808bdccffc44d1d2d0",
+        "environment_sid": "ZE59c5da4f5ff7e98f2ce35f39df892e5d",
+        "offset": {
+          "x": 3400,
+          "y": -410
+        },
+        "function_sid": "ZH1db2c25c65250de3c509732e25e56b31",
+        "parameters": [
+          {
+            "value": "{{trigger.call.From}}",
+            "key": "clientNumber"
+          },
+          {
+            "value": "{{widgets.get_client_information.parsed.data.properties.idioma_fluxo}}",
+            "key": "idioma"
+          }
+        ],
+        "url": "https://serverless-functions-4443-dev.twil.io/ddi-identifier/identify"
+      }
+    },
+    {
+      "name": "checkIsWorking",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "outBusinessHour1",
+          "event": "noMatch"
+        },
+        {
+          "next": "checkClienteCadastrado",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to true",
+              "arguments": ["{{widgets.isWorking.parsed.isWorking}}"],
+              "type": "equal_to",
+              "value": "true"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.isWorking.parsed.isWorking}}",
+        "offset": {
+          "x": 2090,
+          "y": 130
+        }
+      }
+    },
+    {
+      "name": "outBusinessHour1",
+      "type": "say-play",
+      "transitions": [
+        {
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": 1650,
+          "y": 480
+        },
+        "loop": 1,
+        "say": "{{widgets.isWorking.parsed.offlineMessage}}",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "isWorking",
+      "type": "run-function",
+      "transitions": [
+        {
+          "next": "checkIsWorking",
+          "event": "success"
+        },
+        {
+          "next": "outBusinessHour1",
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZS6dfd3ba3686bb3fb7a0a5fe1bf51ae09",
+        "environment_sid": "ZE6ce58c4ff44e3414e02d8598280ebd6c",
+        "offset": {
+          "x": 1960,
+          "y": -160
+        },
+        "function_sid": "ZH07f30cac54b31d12a419654de3611258",
+        "url": "https://serverless-downtime-manager-8207-dev.twil.io/check-for-downtime"
+      }
+    },
+    {
+      "name": "boas_vindas_Portugues",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalPortugues",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": 3720,
+          "y": 940
+        },
+        "loop": 1,
+        "say": "Olá, seja bem-vindo a central de atendimento LogComex!",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "menuPrincipalPortugues",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "splitColaborador",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "setErroContador1",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 4130,
+          "y": 930
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Em que podemos te ajudar?\n\nDigite 1, se quer falar com um guardião sobre meu plano.\n\nDigite 2, se quer falar com o suporte.\n\nDigite 3, se quer falar com o financeiro.\n\nDigite 4, se quer tratar da renovação de contrato.\n\nDigite 5, se gostaria de contratar uma nova funcionalidade ou plano.\n\nOu se for um colaborador Logcomex, digite 6.",
+        "language": "pt-BR",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 15
+      }
+    },
+    {
+      "name": "checkMenuPrincipalPortugues",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "setErroContador1",
+          "event": "noMatch"
+        },
+        {
+          "next": "getGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - GUARDIÃO",
+              "arguments": ["{{widgets.menuPrincipalPortugues.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToSuporte",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - SUPORTE",
+              "arguments": ["{{widgets.menuPrincipalPortugues.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "sendToFinanceiro",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3 - FINANCEIRO",
+              "arguments": ["{{widgets.menuPrincipalPortugues.Digits}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "getGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4 - GUARDIÃO - NEGOCIAÇÃO",
+              "arguments": ["{{widgets.menuPrincipalPortugues.Digits}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "next": "getFarmer",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "5 - FARMER",
+              "arguments": ["{{widgets.menuPrincipalPortugues.Digits}}"],
+              "type": "equal_to",
+              "value": "5"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuPrincipalPortugues.Digits}}",
+        "offset": {
+          "x": 5800,
+          "y": 330
+        }
+      }
+    },
+    {
+      "name": "getFarmer",
+      "type": "run-function",
+      "transitions": [
+        {
+          "next": "sendToFarmer",
+          "event": "success"
+        },
+        {
+          "next": "sendToFarmer",
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZS94a60054fb8b17808bdccffc44d1d2d0",
+        "environment_sid": "ZE59c5da4f5ff7e98f2ce35f39df892e5d",
+        "offset": {
+          "x": 7530,
+          "y": 1150
+        },
+        "function_sid": "ZH9d16df15f9ba09a49f2a9f70b4ecb8d8",
+        "parameters": [
+          {
+            "value": "{{widgets.GetClientInformation.parsed.data.properties.associatedcompanyid}}",
+            "key": "company_id"
+          }
+        ],
+        "url": "https://serverless-functions-4443-dev.twil.io/hubspot-integration/get-hubspot-company-farmer"
+      }
+    },
+    {
+      "name": "sendToFarmer",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 7570,
+          "y": 1700
+        },
+        "workflow": "WWca4a7942493dde9e64b11ae6936b6e4a",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"send-to-Retencao\",\n \"isFarmerActive\": \"true\",\n\"location\": \"{{flow.variables.location}}\" ,\n \"farmerToSend\": \"{{widgets.getFarmer.parsed.farmerEmail}}\",\n \"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n \"customers\": {\n \"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n {%if widgets.GetClientInformation.parsed.success%}\n \"name\": \"{{widgets.gGetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n {%endif%}\n },\n \"conversations\": {\n \"selected_option_on_flow\": \"Opção 5 - Farmer\",\n \"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n {%endif%}\n }\n}"
+      }
+    },
+    {
+      "name": "sendToSuporte",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 6090,
+          "y": 1350
+        },
+        "workflow": "WWca4a7942493dde9e64b11ae6936b6e4a",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"send-to-Suporte_Geral_SMB1_SMB2_KAN1\",\n \"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n \"location\": \"{{flow.variables.location}}\" , \n \"customers\": {\n \"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n {%if widgets.GetClientInformation.parsed.success%}\n \"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n {%endif%}\n },\n \"conversations\": {\n \"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n \"selected_option_on_flow\": \"Opção 2 - Suporte\",\n {%if widgets.GetClientInformation.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n {%endif%}\n }\n}"
+      }
+    },
+    {
+      "name": "AguardePortugues",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "checkMenuPrincipalPortugues",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": 5300,
+          "y": 910
+        },
+        "loop": 1,
+        "say": "Aguarde um momento enquanto eu encontro um Logger disponível para te atender!",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "sendToFinanceiro",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 7180,
+          "y": 1180
+        },
+        "workflow": "WWca4a7942493dde9e64b11ae6936b6e4a",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"send-to-Financeiro\",\n \"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n \"location\": \"{{flow.variables.location}}\" , \n \"customers\": {\n \"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n {%if widgets.GetClientInformation.parsed.success%}\n \"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n {%endif%}\n },\n \"conversations\": {\n \"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n \"selected_option_on_flow\": \"Opção 3 - Financeiro\",\n {%if widgets.GetClientInformation.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n {%endif%}\n }\n}"
+      }
+    },
+    {
+      "name": "sendToGuardiao",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 6700,
+          "y": 1690
+        },
+        "workflow": "WWca4a7942493dde9e64b11ae6936b6e4a",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"{{flow.variables.taskGuardianRedirect}}\",\n \"clientInformation\":{{widgets.GetClientInformation.parsed.data.properties|to_json}},\n \"location\": \"{{flow.variables.location}}\" , \n \"customers\": {\n \"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n {%if widgets.GetClientInformation.parsed.success%}\n \"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n {%endif%}\n },\n \"conversations\": {\n \"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n \"selected_option_on_flow\": \"{{widgets.menuPrincipalPortugues.Digits}} - Guardião\",\n {%if widgets.GetClientInformation.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n {%endif%}\n }\n}"
+      }
+    },
+    {
+      "name": "setLanguageHubspot",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "isWorking",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.GetClientInformation.parsed.data.properties.idioma_fluxo}}",
+            "key": "language"
+          },
+          {
+            "value": "Polly.Lupe",
+            "key": "voice"
+          }
+        ],
+        "offset": {
+          "x": 1950,
+          "y": -360
+        }
+      }
+    },
+    {
+      "name": "boas_vindas_Espanhol",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalEspanhol",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Conchita",
+        "offset": {
+          "x": 3670,
+          "y": 1790
+        },
+        "loop": 1,
+        "say": "¡Hola, bienvenido al centro de llamadas de LogComex!",
+        "language": "es-ES"
+      }
+    },
+    {
+      "name": "menuPrincipalEspanhol",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "AguardeEspanhol",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "setErroContador2",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Conchita",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 4050,
+          "y": 1790
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Como podemos ayudarte?\n\nIngrese 1 si desea hablar con un tutor sobre mi plan.\n\nEscribe 2 si quieres hablar con soporte.\n\nEscriba 3 si desea hablar con finanzas.\n\nIngrese 4 si desea manejar la renovación del contrato.\n\nEscriba 5 si desea comprar una nueva función o plan.\n\nO si es empleado de Logcomex, digite 6.",
+        "language": "es-ES",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 15
+      }
+    },
+    {
+      "name": "AguardeEspanhol",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "splitColaboradorES",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Conchita",
+        "offset": {
+          "x": 4420,
+          "y": 1790
+        },
+        "loop": 1,
+        "say": "¡Espera un momento mientras encuentro un registrador disponible para ayudarte!",
+        "language": "es-ES"
+      }
+    },
+    {
+      "name": "checkMenuPrincipalEspanhol",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "setErroContador2",
+          "event": "noMatch"
+        },
+        {
+          "next": "getGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "GUARDIAO",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToSuporte",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - SUPORTE",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "sendToFinanceiro",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3 - FINANCEIRO",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "getGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4 - GUARDIAO - NEGOCIACAO",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "next": "getFarmer",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "5 - FARMER",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "5"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuPrincipalEspanhol.Digits}}",
+        "offset": {
+          "x": 5730,
+          "y": 1780
+        }
+      }
+    },
+    {
+      "name": "boas_vindas_Ingles",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalIngles",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Salli",
+        "offset": {
+          "x": 3650,
+          "y": 2680
+        },
+        "loop": 1,
+        "say": "Hello, welcome to the LogComex call center!",
+        "language": "en-US"
+      }
+    },
+    {
+      "name": "menuPrincipalIngles",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "AguardeIngles",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "setContadorErro3",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Salli",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 4050,
+          "y": 2670
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "How can we help you?\n\nEnter 1 if you need to speak to a tutor about your plan.\n\nType 2 if you want to talk to support.\n\nType 3 if you need to talk to finance.\n\nEnter 4 if you want to deal with the renewal of the contract.\n\nType 5 if you would like to hire a new functionality or plan.\n\nOr if you are a Logcomex employee, type 6.",
+        "language": "en-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 15
+      }
+    },
+    {
+      "name": "AguardeIngles",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "splitColaboradorEN",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Salli",
+        "offset": {
+          "x": 4410,
+          "y": 2670
+        },
+        "loop": 1,
+        "say": "Wait a moment while I find a Logger available to assist you!",
+        "language": "en-US"
+      }
+    },
+    {
+      "name": "checkMenuPrincipalIngles",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "setContadorErro3",
+          "event": "noMatch"
+        },
+        {
+          "next": "getGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - GUARDIAO",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToSuporte",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - SUPORTE",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "sendToFinanceiro",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3 - FINANCEIRO",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "getGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4 - GUARDIAO - NEGOCIACAO",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "next": "getFarmer",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "5 - FARMER",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "5"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuPrincipalEspanhol.Digits}}",
+        "offset": {
+          "x": 5740,
+          "y": 2680
+        }
+      }
+    },
+    {
+      "name": "checkClienteCadastrado",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "audioIdiomaPT",
+          "event": "noMatch"
+        },
+        {
+          "next": "get_language_client",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to true",
+              "arguments": ["{{widgets.GetClientInformation.parsed.success}}"],
+              "type": "equal_to",
+              "value": "true"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.GetClientInformation.parsed.success}}",
+        "offset": {
+          "x": 2250,
+          "y": 970
+        }
+      }
+    },
+    {
+      "name": "numeroNaoCadastrado",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "checkNumeroNaoCadastrado",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "setErroContador4",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": -1660,
+          "y": 450
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Notei que este número não está cadastrado em nosso sistema. \n\nDigite 1 se já é um cliente Logcomex.\n\nOu digite 2 se ainda não é cliente.",
+        "language": "pt-BR",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 11
+      }
+    },
+    {
+      "name": "checkNumeroNaoCadastrado",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "setErroContador4",
+          "event": "noMatch"
+        },
+        {
+          "next": "menuPrincipalNaoCliente",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - Não Cliente",
+              "arguments": ["{{widgets.numeroNaoCadastrado.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "boas_vindas_Portugues",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - Cliente",
+              "arguments": ["{{widgets.numeroNaoCadastrado.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.numeroNaoCadastrado.Digits}}",
+        "offset": {
+          "x": -1600,
+          "y": 830
+        }
+      }
+    },
+    {
+      "name": "menuPrincipalNaoCliente",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "checkMenuPrincipalNaoCliente",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "setErroContador5",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": -1520,
+          "y": 1260
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Em que podemos te ajudar?\n\nDigite 1 para conhecer ou contratar os produtos.\n\nDigite 2 para falar com departamento de suprimentos.\n\nDigite 3 se quer falar com departamento financeiro.\n\nOu digite 4 para falar com o RH.",
+        "language": "pt-BR",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 15
+      }
+    },
+    {
+      "name": "checkMenuPrincipalNaoCliente",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "sendToProdutos",
+          "event": "noMatch"
+        },
+        {
+          "next": "sendToProdutos",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - PRODUTOS",
+              "arguments": ["{{widgets.menuPrincipalNaoCliente.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToSuprimentos",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - SUPRIMENTOS",
+              "arguments": ["{{widgets.menuPrincipalNaoCliente.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "sendToFinanceiroNaoCliente",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3 - FINANCEIRO",
+              "arguments": ["{{widgets.menuPrincipalNaoCliente.Digits}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "sendToRH",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4 - RH",
+              "arguments": ["{{widgets.menuPrincipalNaoCliente.Digits}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuPrincipalNaoCliente.Digits}}",
+        "offset": {
+          "x": 180,
+          "y": 2360
+        }
+      }
+    },
+    {
+      "name": "sendToProdutos",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -410,
+          "y": 3010
+        },
+        "workflow": "WW1e7fd60c56277b70a67cb44a82d3f206",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"send-to-comercial\",\n\"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n \"location\": \"{{flow.variables.location}}\" , \n\"customers\": {\n\"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n\"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n\"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n{%else%}\n\"name\": \"Cliente não encontrado\",\n\"organization\": \"Cliente não encontrado\",\n\"email\": \"Cliente não encontrado\"\n{%endif%}\n},\n\"conversations\": {\n\"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n\"selected_option_on_flow\": \"Opção 1 - Produtos\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n{%else%}\n\"conversation_attribute_2\": \"Cliente não encontrado\"\n{%endif%}\n}\n}"
+      }
+    },
+    {
+      "name": "sendToSuprimentos",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -20,
+          "y": 3000
+        },
+        "workflow": "WW1e7fd60c56277b70a67cb44a82d3f206",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"send-to-buy\",\n\"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n \"location\": \"{{flow.variables.location}}\" , \n\"customers\": {\n\"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n\"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n\"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n{%else%}\n\"name\": \"Cliente não encontrado\",\n\"organization\": \"Cliente não encontrado\",\n\"email\": \"Cliente não encontrado\"\n{%endif%}\n},\n\"conversations\": {\n\"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n\"selected_option_on_flow\": \"Opção 2 - Suprimentos\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n{%else%}\n\"conversation_attribute_2\": \"Cliente não encontrado\"\n{%endif%}\n}\n}"
+      }
+    },
+    {
+      "name": "sendToFinanceiroNaoCliente",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 410,
+          "y": 2990
+        },
+        "workflow": "WW1e7fd60c56277b70a67cb44a82d3f206",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"send-to-financial\",\n\"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n \"location\": \"{{flow.variables.location}}\" , \n\"customers\": {\n\"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n\"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n\"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n{%else%}\n\"name\": \"Cliente não encontrado\",\n\"organization\": \"Cliente não encontrado\",\n\"email\": \"Cliente não encontrado\"\n{%endif%}\n},\n\"conversations\": {\n\"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n\"selected_option_on_flow\": \"Opção 3 - Financeiro - Cliente Não Cadastrado\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n{%else%}\n\"conversation_attribute_2\": \"Cliente não encontrado\"\n{%endif%}\n}\n}"
+      }
+    },
+    {
+      "name": "sendToRH",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 770,
+          "y": 2990
+        },
+        "workflow": "WW1e7fd60c56277b70a67cb44a82d3f206",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"subject\": \"send-to-rh\",\n\"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n\"location\": \"{{flow.variables.location}}\" , \n\"customers\": {\n\"phone\": \"{{trigger.call.From | replace: 'whatsapp:', ''}}\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n\"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n\"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n{%else%}\n\"name\": \"Cliente não encontrado\",\n\"organization\": \"Cliente não encontrado\",\n\"email\": \"Cliente não encontrado\"\n{%endif%}\n},\n\"conversations\": {\n\"external_contact\": \"{{trigger.call.To | replace: 'whatsapp:', ''}}\",\n\"selected_option_on_flow\": \"Opção 3 - Financeiro - Cliente Não Cadastrado\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"conversation_attribute_2\": \"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n{%else%}\n\"conversation_attribute_2\": \"Cliente não encontrado\"\n{%endif%}\n}\n}"
+      }
+    },
+    {
+      "name": "setErroContador1",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "splitErro1",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.contador | plus: 1}}",
+            "key": "contador"
+          }
+        ],
+        "offset": {
+          "x": 4130,
+          "y": 610
+        }
+      }
+    },
+    {
+      "name": "splitErro1",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "audioErro1",
+          "event": "noMatch"
+        },
+        {
+          "next": "agradecimento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "agradecimento",
+              "arguments": ["{{flow.variables.contador}}"],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.contador}}",
+        "offset": {
+          "x": 4380,
+          "y": 370
+        }
+      }
+    },
+    {
+      "name": "audioErro1",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalPortugues",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": 4560,
+          "y": 610
+        },
+        "loop": 1,
+        "say": "Opção inválida, por favor digite novamente.",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "agradecimento",
+      "type": "say-play",
+      "transitions": [
+        {
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": 3000,
+          "y": 500
+        },
+        "loop": 1,
+        "say": "A Logcomex agracede o seu contato. \n\nAté a próxima!",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "audioErro2",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalEspanhol",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": 4190,
+          "y": 1440
+        },
+        "loop": 1,
+        "say": "Opción no válida, vuelva a ingresar.",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "setErroContador2",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "splitErro2",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.contador | plus: 1}}",
+            "key": "contador"
+          }
+        ],
+        "offset": {
+          "x": 3760,
+          "y": 1440
+        }
+      }
+    },
+    {
+      "name": "splitErro2",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "audioErro2",
+          "event": "noMatch"
+        },
+        {
+          "next": "agradecimentoEspanhol",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "agradecimento",
+              "arguments": ["{{flow.variables.contador}}"],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.contador}}",
+        "offset": {
+          "x": 4010,
+          "y": 1200
+        }
+      }
+    },
+    {
+      "name": "agradecimentoEspanhol",
+      "type": "say-play",
+      "transitions": [
+        {
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Lucia-Neural",
+        "offset": {
+          "x": 2990,
+          "y": 1160
+        },
+        "loop": 1,
+        "say": "Logcomex agradece su contacto.\n\n¡Hasta la próxima!",
+        "language": "es-ES"
+      }
+    },
+    {
+      "name": "splitErro3",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "audioErro3",
+          "event": "noMatch"
+        },
+        {
+          "next": "agradecimentoIngles",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "agradecimento",
+              "arguments": ["{{flow.variables.contador}}"],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.contador}}",
+        "offset": {
+          "x": 3950,
+          "y": 2130
+        }
+      }
+    },
+    {
+      "name": "setContadorErro3",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "splitErro3",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.contador | plus: 1}}",
+            "key": "contador"
+          }
+        ],
+        "offset": {
+          "x": 3700,
+          "y": 2370
+        }
+      }
+    },
+    {
+      "name": "audioErro3",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalIngles",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": 4130,
+          "y": 2370
+        },
+        "loop": 1,
+        "say": "Invalid option, please re-enter.",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "agradecimentoIngles",
+      "type": "say-play",
+      "transitions": [
+        {
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Salli",
+        "offset": {
+          "x": 2930,
+          "y": 2090
+        },
+        "loop": 1,
+        "say": "Logcomex appreciates your contact.\n\nTo the next!",
+        "language": "en-US"
+      }
+    },
+    {
+      "name": "splitErro4",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "audioErro4",
+          "event": "noMatch"
+        },
+        {
+          "next": "agradecimento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "agradecimento",
+              "arguments": ["{{flow.variables.contador}}"],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.contador}}",
+        "offset": {
+          "x": -2190,
+          "y": 690
+        }
+      }
+    },
+    {
+      "name": "setErroContador4",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "splitErro4",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.contador | plus: 1}}",
+            "key": "contador"
+          }
+        ],
+        "offset": {
+          "x": -2440,
+          "y": 930
+        }
+      }
+    },
+    {
+      "name": "audioErro4",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "numeroNaoCadastrado",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": -2010,
+          "y": 930
+        },
+        "loop": 1,
+        "say": "Opção inválida, por favor digite novamente.",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "splitErro5",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "audioErro5",
+          "event": "noMatch"
+        },
+        {
+          "next": "agradecimento",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "agradecimento",
+              "arguments": ["{{flow.variables.contador}}"],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.contador}}",
+        "offset": {
+          "x": -2090,
+          "y": 1270
+        }
+      }
+    },
+    {
+      "name": "setErroContador5",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "splitErro5",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.contador | plus: 1}}",
+            "key": "contador"
+          }
+        ],
+        "offset": {
+          "x": -2340,
+          "y": 1510
+        }
+      }
+    },
+    {
+      "name": "audioErro5",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalNaoCliente",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": -1910,
+          "y": 1510
+        },
+        "loop": 1,
+        "say": "Opção inválida, por favor digite novamente.",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "audioIdiomaPT",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "splitIdiomaPT",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "audioIdiomaES",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": -1310,
+          "y": 70
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Este atendimento será em português, se deseja continuar, digite 1.",
+        "language": "pt-BR",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 4
+      }
+    },
+    {
+      "name": "splitIdiomaPT",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "opcao_invalida",
+          "event": "noMatch"
+        },
+        {
+          "next": "numeroNaoCadastrado",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": ["{{widgets.audioIdiomaPT.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToFlexTest",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "test",
+              "arguments": ["{{widgets.audioIdiomaPT.Digits}}"],
+              "type": "equal_to",
+              "value": "0"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.audioIdiomaPT.Digits}}",
+        "offset": {
+          "x": -1670,
+          "y": 70
+        }
+      }
+    },
+    {
+      "name": "audioIdiomaES",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "splitIdiomaES",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "audioIdiomaEN",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Penelope",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": -590,
+          "y": 60
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Para ser contestado en español, escriba 2.",
+        "language": "es-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 4
+      }
+    },
+    {
+      "name": "audioIdiomaEN",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "splitIdiomaEN",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "audioIdiomaPT",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Kimberly-Neural",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 140,
+          "y": 60
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "To be answered in English, type 3.",
+        "language": "en-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 4
+      }
+    },
+    {
+      "name": "splitIdiomaES",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "opcao_invalida",
+          "event": "noMatch"
+        },
+        {
+          "next": "numeroNaoCadastradoES",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": ["{{widgets.audioIdiomaES.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.audioIdiomaES.Digits}}",
+        "offset": {
+          "x": -940,
+          "y": 60
+        }
+      }
+    },
+    {
+      "name": "splitIdiomaEN",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "opcao_invalida",
+          "event": "noMatch"
+        },
+        {
+          "next": "numeroNaoCadastradoEN",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": ["{{widgets.audioIdiomaEN.Digits}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.audioIdiomaEN.Digits}}",
+        "offset": {
+          "x": -220,
+          "y": 60
+        }
+      }
+    },
+    {
+      "name": "opcao_invalida",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "audioIdiomaPT",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "offset": {
+          "x": -2050,
+          "y": -140
+        },
+        "loop": 1,
+        "say": "Opção inválida",
+        "language": "pt-BR"
+      }
+    },
+    {
+      "name": "numeroNaoCadastradoES",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "checkNumeroNaoCadastradoES",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "audioErro6",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Penelope",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": -730,
+          "y": 390
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Noté que este número no está registrado en nuestro sistema.\n\nIngrese 1 si ya es cliente de Logcomex.\n\nO escriba 2 si aún no es cliente.",
+        "language": "es-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 11
+      }
+    },
+    {
+      "name": "audioErro6",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "numeroNaoCadastradoES",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Penelope",
+        "offset": {
+          "x": -1080,
+          "y": 870
+        },
+        "loop": 1,
+        "say": "Opción no válida, vuelva a ingresar.",
+        "language": "es-US"
+      }
+    },
+    {
+      "name": "checkNumeroNaoCadastradoES",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "audioErro6",
+          "event": "noMatch"
+        },
+        {
+          "next": "menuPrincipalNaoClienteES",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - Não Cliente",
+              "arguments": ["{{widgets.numeroNaoCadastradoES.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "boas_vindas_Espanhol",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - Cliente",
+              "arguments": ["{{widgets.numeroNaoCadastradoES.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.numeroNaoCadastradoES.Digits}}",
+        "offset": {
+          "x": -670,
+          "y": 770
+        }
+      }
+    },
+    {
+      "name": "menuPrincipalNaoClienteES",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "checkMenuPrincipalNaoCliente",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "audioErro7",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Penelope",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": -590,
+          "y": 1200
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "como podemos ayudarte?\n\nEscriba 1 para conocer o contratar los productos.\n\nIntroduzca 2 para hablar con el departamento de suministros.\n\nIngrese 3 si desea hablar con el departamento de finanzas.\n\nO marque 4 para hablar con Recursos Humanos.",
+        "language": "es-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 11
+      }
+    },
+    {
+      "name": "audioErro7",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "menuPrincipalNaoClienteES",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Penelope",
+        "offset": {
+          "x": -980,
+          "y": 1450
+        },
+        "loop": 1,
+        "say": "Opción no válida, vuelva a ingresar.",
+        "language": "es-US"
+      }
+    },
+    {
+      "name": "numeroNaoCadastradoEN",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "Copy_of_checkNumeroNaoCadastradoES",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "Copy_of_audioErro6",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Kimberly-Neural",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 130,
+          "y": 320
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "I noticed that this number is not registered in our system.\n\nEnter 1 if you are already a Logcomex customer.\n\nOr type 2 if you are not already a customer.",
+        "language": "en-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 11
+      }
+    },
+    {
+      "name": "Copy_of_audioErro6",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "numeroNaoCadastradoEN",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Kimberly",
+        "offset": {
+          "x": -220,
+          "y": 800
+        },
+        "loop": 1,
+        "say": "Invalid option, please re-enter.",
+        "language": "en-US"
+      }
+    },
+    {
+      "name": "Copy_of_checkNumeroNaoCadastradoES",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "Copy_of_audioErro6",
+          "event": "noMatch"
+        },
+        {
+          "next": "Copy_of_menuPrincipalNaoClienteES",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - Não Cliente",
+              "arguments": ["{{widgets.numeroNaoCadastradoEN.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "boas_vindas_Ingles",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - Cliente",
+              "arguments": ["{{widgets.numeroNaoCadastradoEN.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.numeroNaoCadastradoEN.Digits}}",
+        "offset": {
+          "x": 190,
+          "y": 700
+        }
+      }
+    },
+    {
+      "name": "Copy_of_menuPrincipalNaoClienteES",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "checkMenuPrincipalNaoCliente",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "Copy_of_audioErro7",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Kimberly",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 270,
+          "y": 1130
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "How can we help you?\n\nType 1 to know or hire the products.\n\nEnter 2 to speak to the supply department.\n\nEnter 3 if you want to speak with the finance department.\n\nOr dial 4 to speak with HR.",
+        "language": "en-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 11
+      }
+    },
+    {
+      "name": "Copy_of_audioErro7",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "Copy_of_menuPrincipalNaoClienteES",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Kimberly",
+        "offset": {
+          "x": -120,
+          "y": 1380
+        },
+        "loop": 1,
+        "say": "Invalid option, please re-enter.",
+        "language": "en-US"
+      }
+    },
+    {
+      "name": "splitColaborador",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "AguardePortugues",
+          "event": "noMatch"
+        },
+        {
+          "next": "menuColaborador",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "6",
+              "arguments": ["{{widgets.menuPrincipalPortugues.Digits}}"],
+              "type": "equal_to",
+              "value": "6"
+            }
+          ]
+        },
+        {
+          "next": "sendToFlexTest",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 99",
+              "arguments": ["{{widgets.menuPrincipalPortugues.Digits}}"],
+              "type": "equal_to",
+              "value": "0"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuPrincipalPortugues.Digits}}",
+        "offset": {
+          "x": 4520,
+          "y": 940
+        }
+      }
+    },
+    {
+      "name": "menuColaborador",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "splitMenuColaborador",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "menuColaborador",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Camila-Neural",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 4510,
+          "y": 1210
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "Em que podemos te ajudar?\n\nDigite 1, se quer falar com o RH.\n\nOu digite 2, se quer falar com o financeiro.",
+        "language": "pt-BR",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 15
+      }
+    },
+    {
+      "name": "splitMenuColaborador",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "sendToRH",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - RH",
+              "arguments": ["{{widgets.menuColaborador.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToFinanceiroNaoCliente",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - financeiro",
+              "arguments": ["{{widgets.menuColaborador.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuColaborador.Digits}}",
+        "offset": {
+          "x": 4900,
+          "y": 1210
+        }
+      }
+    },
+    {
+      "name": "splitColaboradorES",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "checkMenuPrincipalEspanhol",
+          "event": "noMatch"
+        },
+        {
+          "next": "menuColaboradorES",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "6",
+              "arguments": ["{{widgets.menuPrincipalEspanhol.Digits}}"],
+              "type": "equal_to",
+              "value": "6"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuPrincipalEspanhol.Digits}}",
+        "offset": {
+          "x": 4800,
+          "y": 1790
+        }
+      }
+    },
+    {
+      "name": "menuColaboradorES",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "splitMenuColaboradorES",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "menuColaboradorES",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Penelope",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 4800,
+          "y": 2060
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "como podemos ayudarte?\n\nEscriba 1 si desea hablar con Recursos Humanos.\n\nO escriba 2 si desea hablar con finanzas.",
+        "language": "es-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 15
+      }
+    },
+    {
+      "name": "splitMenuColaboradorES",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "sendToRH",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - RH",
+              "arguments": ["{{widgets.menuColaboradorES.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToFinanceiroNaoCliente",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - financeiro",
+              "arguments": ["{{widgets.menuColaboradorES.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuColaboradorES.Digits}}",
+        "offset": {
+          "x": 5190,
+          "y": 2060
+        }
+      }
+    },
+    {
+      "name": "splitColaboradorEN",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "checkMenuPrincipalIngles",
+          "event": "noMatch"
+        },
+        {
+          "next": "menuColaboradorEN",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "6",
+              "arguments": ["{{widgets.menuPrincipalIngles.Digits}}"],
+              "type": "equal_to",
+              "value": "6"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuPrincipalIngles.Digits}}",
+        "offset": {
+          "x": 4820,
+          "y": 2680
+        }
+      }
+    },
+    {
+      "name": "splitMenuColaboradorEN",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "sendToRH",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1 - RH",
+              "arguments": ["{{widgets.menuColaboradorEN.Digits}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "sendToFinanceiroNaoCliente",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2 - financeiro",
+              "arguments": ["{{widgets.menuColaboradorEN.Digits}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menuColaboradorEN.Digits}}",
+        "offset": {
+          "x": 5210,
+          "y": 2950
+        }
+      }
+    },
+    {
+      "name": "menuColaboradorEN",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "splitMenuColaboradorEN",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "menuColaboradorEN",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "voice": "Polly.Kimberly",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 4820,
+          "y": 2950
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "say": "How can we help you?\n\nType 1 if you want to speak with HR.\n\nOr type 2 if you want to talk to finance.",
+        "language": "en-US",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 15
+      }
+    },
+    {
+      "name": "set_location",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "GetClientInformation",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{% if trigger.call.From  contains  '19342033317' %}International{% else %}Local{% endif %}",
+            "key": "location"
+          }
+        ],
+        "offset": {
+          "x": 2170,
+          "y": -640
+        }
+      }
+    },
+    {
+      "name": "sendToFlexTest",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 5060,
+          "y": 630
+        },
+        "workflow": "WW0ee76b16197f7eb3b936f8450ed66b60",
+        "channel": "TC2b22a44380e72b5d852f91c64ec153c9",
+        "attributes": "{\n\"transferTargetType\": \"worker\",\n\"targetSid\": \"WK1fc520911036ebf31961547f5829510b\",\n\"clientInformation\": {{widgets.GetClientInformation.parsed.data.properties|to_json}},\n\"customers\": {\n\"phone\": \"{{trigger.call.From}}\",\n{%if widgets.GetClientInformation.parsed.success%}\n\"name\": \"{{widgets.GetClientInformation.parsed.data.properties.firstname}} {{widgets.GetClientInformation.parsed.data.properties.lastname}}\",\n\"organization\": \"{{widgets.GetClientInformation.parsed.data.properties.company}}\",\n\"email\": \"{{widgets.GetClientInformation.parsed.data.properties.email}}\"\n {%else%}\n\"name\": \"Cliente não encontrado\",\n\"organization\": \"Cliente não encontrado\",\n\"email\": \"Cliente não encontrado\"\n {%endif%}\n}\n}"
+      }
+    },
+    {
+      "name": "getGuardianActivity",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "set_variables_1",
+          "event": "success"
+        },
+        {
+          "next": "set_variables_1",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 6700,
+          "y": 1260
+        },
+        "method": "POST",
+        "content_type": "application/json;charset=utf-8",
+        "body": "{\n\"workerEmail\":\"{{widgets.GetClientInformation.parsed.data.properties.guardian}}\"\n}",
+        "url": "https://serverless-functions-4443-dev.twil.io/utils/validate-worker-available"
+      }
+    },
+    {
+      "name": "set_variables_1",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "sendToGuardiao",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{%if widgets.getGuardianActivity.parsed.to == \"worker\"%}send-to-guardian{% else %}send-to-{{widgets.GetClientInformation.parsed.data.properties.guardianSkill}}{% endif %}",
+            "key": "taskGuardianRedirect"
+          }
+        ],
+        "offset": {
+          "x": 6700,
+          "y": 1490
+        }
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}

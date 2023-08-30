@@ -1,0 +1,169 @@
+{
+  "description": "A New Flow",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "next": "csatMessage1",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingConversationMessage"
+        },
+        {
+          "event": "incomingRequest"
+        },
+        {
+          "next": "csatMessage1",
+          "event": "incomingParent"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "name": "csatMessage1",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "checkCsatBackupVariable",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finishMessage",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 40,
+          "y": 340
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Antes de finalizar, gostaria de saber sua opinião sobre nossa conversa.\nEm uma escala de 1 a 5, qual nota você dá para o meu atendimento?\n\n5 - 🤩 Muito bom\n4 - 🙂 Bom\n3 - 😐 Regular\n2 - 🙁 Ruim\n1 - 😫 Muito ruim",
+        "timeout": "1200"
+      }
+    },
+    {
+      "name": "checkCsatBackupVariable",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "csatMessage1Invalid",
+          "event": "noMatch"
+        },
+        {
+          "next": "finishMessage",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "[1-5]",
+              "arguments": ["{{widgets.csatMessage1.inbound.Body}}"],
+              "type": "regex",
+              "value": "[1-5]"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.csatMessage1.inbound.Body}}",
+        "offset": {
+          "x": 50,
+          "y": 580
+        }
+      }
+    },
+    {
+      "name": "saveCsatInfo",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "event": "success"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 60,
+          "y": 1060
+        },
+        "method": "POST",
+        "content_type": "application/json;charset=utf-8",
+        "body": "{\n\"proxySession\": \"{{trigger.message.ChannelAttributes.proxySession}}\",\n\"webhookSid\": \"{{trigger.message.WebhookSid}}\",\n\"channelSid\": \"{{trigger.message.ChannelSid}}\",\n\"clientNumber\": \"{{trigger.message.ChannelAttributes.from}}\",\n\"csatMeasure1\": \"{{widgets.csatMessage1.inbound.Body}}\"\n}",
+        "url": "https://serverless-plugin-survey-4093-dev.twil.io/close-survey"
+      }
+    },
+    {
+      "name": "finishMessage",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "saveCsatInfo",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 60,
+          "y": 810
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "A Logcomex agradece seu contato! 💜"
+      }
+    },
+    {
+      "name": "csatMessage1Invalid",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "csatMessage1",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "csatMessage1",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 390,
+          "y": 340
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Não entendi, digite novamente.",
+        "timeout": "1"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}

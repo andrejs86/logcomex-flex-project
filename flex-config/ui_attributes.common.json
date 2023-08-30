@@ -11,7 +11,7 @@
         "filter_teams_view": false
       },
       "callback_and_voicemail": {
-        "enabled": true,
+        "enabled": false,
         "allow_requeue": true,
         "max_attempts": 3,
         "auto_select_task": true
@@ -25,14 +25,14 @@
         "multi_participant": true
       },
       "chat_to_video_escalation": {
-        "enabled": true
+        "enabled": false
       },
       "conference": {
         "enabled": true,
         "hold_workaround": false
       },
       "enhanced_crm_container": {
-        "enabled": true,
+        "enabled": false,
         "url": "https://www.bing.com/search?q={{task.from}}",
         "should_display_url_when_no_tasks": false,
         "display_url_when_no_tasks": "https://www.bing.com"
@@ -51,7 +51,7 @@
         "supervisor_alert_toggle": true
       },
       "omni_channel_capacity_management": {
-        "enabled": false,
+        "enabled": true,
         "channel": "chat",
         "default_max_capacity": 2
       },
@@ -83,11 +83,11 @@
         "log_filters": false,
         "applied_filters": {
           "activities": true,
-          "email": true,
-          "department": true,
+          "email": false,
+          "department": false,
           "queue_no_worker_data": false,
           "queue_worker_data": false,
-          "team": true,
+          "team": false,
           "agent_skills": true
         },
         "department_options": [
@@ -129,7 +129,7 @@
         "enabled": false
       },
       "agent_automation": {
-        "enabled": true,
+        "enabled": false,
         "configuration": [
           {
             "channel": "voice",
@@ -153,7 +153,7 @@
       },
       "supervisor_complete_reservation": {
         "enabled": true,
-        "outcome": "Completed by supervisor"
+        "outcome": "Finalizada pelo supervisor"
       },
       "canned_responses": {
         "enabled": true,
@@ -171,14 +171,14 @@
         "use_paste_search_icon": false,
         "queue": {
           "enabled": true,
-          "show_only_queues_with_available_workers": false,
+          "show_only_queues_with_available_workers": true,
           "show_real_time_data": true,
           "enforce_queue_filter_from_worker_object": true,
           "enforce_global_exclude_filter": false,
           "global_exclude_filter": ""
         },
         "external_directory": {
-          "enabled": true,
+          "enabled": false,
           "skipPhoneNumberValidation": false,
           "directory": [
             {
@@ -191,7 +191,7 @@
         }
       },
       "dispositions": {
-        "enabled": true,
+        "enabled": false,
         "enable_notes": true,
         "require_disposition": false,
         "global_dispositions": [
@@ -219,14 +219,14 @@
         "enabled": true
       },
       "localization": {
-        "enabled": false,
+        "enabled": true,
         "show_menu": true
       },
       "park_interaction": {
         "enabled": true
       },
       "alert_tma": {
-        "enabled": false,
+        "enabled": true,
         "voice_max_duration": 120,
         "whatsapp_max_duration": 300
       },
@@ -239,6 +239,30 @@
         }
       },
       "message_media": {
+        "enabled": true
+      },
+      "sound_notifications": {
+        "enabled": true
+      },
+      "custom_queue_metrics": {
+        "enabled": true,
+        "accountSid": "",
+        "authToken": "",
+        "workspaceSid": ""
+      },
+      "hubspot_integration": {
+        "enabled": true,
+        "datadogLogsBaseURL": "",
+        "internationalQueueSid": "",
+        "everyoneQueueSid": ""
+      },
+      "whatsapp_sender": {
+        "enabled": true
+      },
+      "save_reason": {
+        "enabled": true
+      },
+      "logcomex_theme": {
         "enabled": true
       }
     }

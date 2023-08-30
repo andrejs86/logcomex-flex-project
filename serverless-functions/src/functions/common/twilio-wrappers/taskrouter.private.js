@@ -408,7 +408,6 @@ exports.fetchTask = async function fetchTask(parameters) {
 
   try {
     const client = context.getTwilioClient();
-
     const task = await client.taskrouter.v1.workspaces(process.env.TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
 
     return {
@@ -475,5 +474,67 @@ exports.getTasks = async function getTasks(parameters) {
     };
   } catch (error) {
     return retryHandler(error, parameters, exports.getTasks);
+  }
+};
+
+/**
+ * @param {object} parameters the parameters for the function
+ * @param {number} parameters.attempts the number of retry attempts performed
+ * @param {object} parameters.context the context from calling lambda function
+ * @param {string} parameters.ordering (optional) the desired ordering (e.g. DateCreated:desc)
+ * @param {number} parameters.limit (optional) the maximum number of tasks to return (default 1000)
+ * @returns {object} An object containing an array of workers for the account
+ * @description the following method is used to robustly retrieve
+ *  workers for the account
+ */
+exports.getWorkers = async function getWorkers(parameters) {
+  const { context, ordering, limit } = parameters;
+
+  if (!isObject(context)) throw new Error('Invalid parameters object passed. Parameters must contain context object');
+
+  try {
+    const client = context.getTwilioClient();
+    const workers = await client.taskrouter.v1
+      .workspaces(process.env.TWILIO_FLEX_WORKSPACE_SID)
+      .workers.list({ limit, ordering });
+
+    return {
+      success: true,
+      status: 200,
+      workers,
+    };
+  } catch (error) {
+    return retryHandler(error, parameters, exports.getWorkers);
+  }
+};
+
+/**
+ * @param {object} parameters the parameters for the function
+ * @param {number} parameters.attempts the number of retry attempts performed
+ * @param {object} parameters.context the context from calling lambda function
+ * @param {string} parameters.ordering (optional) the desired ordering (e.g. DateCreated:desc)
+ * @param {number} parameters.limit (optional) the maximum number of tasks to return (default 1000)
+ * @returns {object} An object containing an array of activities for the account
+ * @description the following method is used to robustly retrieve
+ *  activities for the account
+ */
+exports.getActivities = async function getActivities(parameters) {
+  const { context, ordering, limit } = parameters;
+
+  if (!isObject(context)) throw new Error('Invalid parameters object passed. Parameters must contain context object');
+
+  try {
+    const client = context.getTwilioClient();
+    const workers = await client.taskrouter.v1
+      .workspaces(process.env.TWILIO_FLEX_WORKSPACE_SID)
+      .activities.list({ limit, ordering });
+
+    return {
+      success: true,
+      status: 200,
+      workers,
+    };
+  } catch (error) {
+    return retryHandler(error, parameters, exports.getActivities);
   }
 };

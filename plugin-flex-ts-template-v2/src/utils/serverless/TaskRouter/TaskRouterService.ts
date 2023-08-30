@@ -1,6 +1,7 @@
-import { TaskAssignmentStatus } from 'types/task-router/Task';
+import Task, { TaskAssignmentStatus } from 'types/task-router/Task';
 import { merge } from 'lodash';
 import { TaskHelper } from '@twilio/flex-ui';
+import { Activity } from 'types/task-router';
 
 import ApiService from '../ApiService';
 import { EncodedParams } from '../../../types/serverless';
@@ -18,6 +19,26 @@ interface UpdateTaskAttributesResponse {
 interface GetQueuesResponse {
   success: boolean;
   queues: Array<Queue>;
+}
+
+interface GetTasksResponse {
+  success: boolean;
+  tasks: Array<Task>;
+}
+
+interface GetTaskResponse {
+  success: boolean;
+  task: Task;
+}
+
+interface GetWorkersResponse {
+  success: boolean;
+  workers: Array<Worker>;
+}
+
+interface GetActivitiesResponse {
+  success: boolean;
+  activities: Array<Activity>;
 }
 
 interface GetWorkerChannelsResponse {
@@ -156,6 +177,30 @@ class TaskRouterService extends ApiService {
     return queues;
   }
 
+  async getTasks(): Promise<Array<Task> | null> {
+    const response = await this.#getTasks();
+    if (response.success) return response.tasks;
+    return [];
+  }
+
+  async getTask(taskSid: string): Promise<Task | null> {
+    const response = await this.#getTask(taskSid);
+    if (response.success) return response.task;
+    return null;
+  }
+
+  async getActivities(): Promise<Array<Activity> | null> {
+    const response = await this.#getActivities();
+    if (response.success) return response.activities;
+    return [];
+  }
+
+  async getWorkers(): Promise<Array<Worker> | null> {
+    const response = await this.#getWorkers();
+    if (response.success) return response.workers;
+    return [];
+  }
+
   async getWorkerChannels(workerSid: string): Promise<Array<WorkerChannelCapacityResponse>> {
     const response = await this.#getWorkerChannels(workerSid);
     if (response.success) return response.workerChannels;
@@ -215,6 +260,75 @@ class TaskRouterService extends ApiService {
       return {
         ...response,
       };
+    });
+  };
+
+  #getTask = async (taskSid: string): Promise<GetTaskResponse> => {
+    const encodedParams: EncodedParams = {
+      Token: encodeURIComponent(this.manager.user.token),
+      taskSid,
+    };
+
+    return this.fetchJsonWithReject<GetTaskResponse>(
+      `${this.serverlessProtocol}://${this.serverlessDomain}/common/flex/taskrouter/get-task`,
+      {
+        method: 'post',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: this.buildBody(encodedParams),
+      },
+    ).then((response): GetTaskResponse => {
+      return response;
+    });
+  };
+
+  #getTasks = async (): Promise<GetTasksResponse> => {
+    const encodedParams: EncodedParams = {
+      Token: encodeURIComponent(this.manager.user.token),
+    };
+
+    return this.fetchJsonWithReject<GetTasksResponse>(
+      `${this.serverlessProtocol}://${this.serverlessDomain}/common/flex/taskrouter/get-tasks`,
+      {
+        method: 'post',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: this.buildBody(encodedParams),
+      },
+    ).then((response): GetTasksResponse => {
+      return response;
+    });
+  };
+
+  #getActivities = async (): Promise<GetActivitiesResponse> => {
+    const encodedParams: EncodedParams = {
+      Token: encodeURIComponent(this.manager.user.token),
+    };
+
+    return this.fetchJsonWithReject<GetActivitiesResponse>(
+      `${this.serverlessProtocol}://${this.serverlessDomain}/common/flex/taskrouter/get-activities`,
+      {
+        method: 'post',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: this.buildBody(encodedParams),
+      },
+    ).then((response): GetActivitiesResponse => {
+      return response;
+    });
+  };
+
+  #getWorkers = async (): Promise<GetWorkersResponse> => {
+    const encodedParams: EncodedParams = {
+      Token: encodeURIComponent(this.manager.user.token),
+    };
+
+    return this.fetchJsonWithReject<GetWorkersResponse>(
+      `${this.serverlessProtocol}://${this.serverlessDomain}/common/flex/taskrouter/get-workers`,
+      {
+        method: 'post',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: this.buildBody(encodedParams),
+      },
+    ).then((response): GetWorkersResponse => {
+      return response;
     });
   };
 

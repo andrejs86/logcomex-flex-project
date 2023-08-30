@@ -1,0 +1,1886 @@
+{
+  "description": "Whatsapp Subflow - Portuguese",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingConversationMessage"
+        },
+        {
+          "event": "incomingRequest"
+        },
+        {
+          "next": "isWorking",
+          "event": "incomingParent"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 70,
+          "y": -300
+        }
+      }
+    },
+    {
+      "name": "main_menu",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_main_menu",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -60,
+          "y": 940
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Olá, esse é o Whatsapp da LogComex!\n\nSobre o que você quer falar?\n\n1 - Já sou cliente, quero falar com o meu Guardião ou com o time de Suporte\n2 - Conhecer nossos produtos\n3 - Quero ser um Logger\n4 - Quero ser fornecedor",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_main_menu",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "no_condition_main_menu",
+          "event": "noMatch"
+        },
+        {
+          "next": "setVariablesToSearchClient",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": ["{{widgets.main_menu.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "menu_know_products",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": ["{{widgets.main_menu.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "be_part_of_the_team",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": ["{{widgets.main_menu.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "be_a_partner",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": ["{{widgets.main_menu.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.main_menu.inbound.Body}}",
+        "offset": {
+          "x": 350,
+          "y": 1240
+        }
+      }
+    },
+    {
+      "name": "finalizacao_no_reply",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 270,
+          "y": 2940
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Obrigado por entrar em contato com a Logcomex! Para conversar conosco novamente, basta enviar uma mensagem."
+      }
+    },
+    {
+      "name": "no_condition_main_menu",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "main_menu",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 430,
+          "y": 880
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Não entendi, pode digitar novamente?!"
+      }
+    },
+    {
+      "name": "be_part_of_the_team",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 950,
+          "y": 770
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Para fazer parte do nosso *#dreamteam*, basta acessar nossa plataforma https://logcomex.gupy.io/, se cadastrar na plataforma e ver qual vaga você se interessa.\n \nSe não encontrar nenhuma posição com o seu perfil, não tem problema, pode deixar seus dados no nosso banco!"
+      }
+    },
+    {
+      "name": "be_a_partner",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1350,
+          "y": 640
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Esse não é o melhor canal para falarmos sobre isto, mas envie sua solicitação para o e-mail: compras@logcomex.com."
+      }
+    },
+    {
+      "name": "split_menu_know_products",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "no_condition_menu_know_product",
+          "event": "noMatch"
+        },
+        {
+          "next": "know_products_opt1",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "know_products_opt2",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "know_products_opt3",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "know_products_opt4",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menu_know_products.inbound.Body}}",
+        "offset": {
+          "x": 1630,
+          "y": 1560
+        }
+      }
+    },
+    {
+      "name": "no_condition_menu_know_product",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "menu_know_products",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1200,
+          "y": 1430
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Não entendi, pode digitar novamente?!"
+      }
+    },
+    {
+      "name": "get_client_email",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "setVariablesToSearchClient1",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -500,
+          "y": 1090
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Poderia me informar seu e-mail cadastrado na plataforma?",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "main_menu_client",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "variableSelectedOptionMainMenuClient",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1230,
+          "y": 1640
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Sobre o que deseja conversar?\n \n1 - Falar com um Logger Guardião sobre a sua Empresa ou assinatura\n2 - Falar com um Logger de Suporte \n3 - Falar com um Logger sobre assuntos financeiros\n4 - Tratar renovação de contrato\n5 - Contratar nova funcionalidade/plano",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "flex_to_financial",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1250,
+          "y": 3550
+        },
+        "workflow": "WW45f278b34e59d6f0d8cdadd75e0cc6a2",
+        "channel": "TC38f2a7207058a506929181a479717c36",
+        "attributes": "{\n\"subject\": \"send-to-financial\",\n \"clientInformation\": {{widgets.get_client_information.parsed.data.properties|to_json}},\n \"customers\": {\n \"phone\": \"{{trigger.message.ChannelAttributes.from | replace: 'whatsapp:', ''}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"name\": \"{{widgets.get_client_information.parsed.data.properties.firstname}} {{widgets.get_client_information.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.get_client_information.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.get_client_information.parsed.data.properties.email}}\"\n    {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n    {%endif%}\n  },\n \"conversations\": {\n \"external_contact\": \"{{trigger.message.ChannelAttributes.twilioNumber | replace: 'whatsapp:', ''}}\",\n \"selected_option_on_flow\": \"{{flow.variables.selectedOptionOnMainMenuClient}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.get_client_information.parsed.data.properties.guardian}}\"\n    {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n    {%endif%}\n  }\n}"
+      }
+    },
+    {
+      "name": "split_main_menu_client",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "httpValidateGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": ["{{widgets.main_menu_client.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "flex_to_support",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": ["{{widgets.main_menu_client.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "flex_to_financial",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": ["{{widgets.main_menu_client.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "httpValidateGuardianActivity",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": ["{{widgets.main_menu_client.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.main_menu_client.inbound.Body}}",
+        "offset": {
+          "x": -1610,
+          "y": 3060
+        }
+      }
+    },
+    {
+      "name": "no_condition_main_menu_client",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "main_menu_client",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1590,
+          "y": 1640
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Não entendi, pode digitar novamente?!"
+      }
+    },
+    {
+      "name": "flex_to_guardian",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1910,
+          "y": 3550
+        },
+        "workflow": "WWfcbc3317b162e102e4165f32a71e29c9",
+        "channel": "TC38f2a7207058a506929181a479717c36",
+        "attributes": "{\n\"subject\": \"send-to-guardian\",\n \"clientInformation\":{{widgets.get_client_information.parsed.data.properties|to_json}},\n \"customers\": {\n \"phone\": \"{{trigger.message.ChannelAttributes.from | replace: 'whatsapp:', ''}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"name\": \"{{widgets.get_client_information.parsed.data.properties.firstname}} {{widgets.get_client_information.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.get_client_information.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.get_client_information.parsed.data.properties.email}}\"\n      {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n      {%endif%}\n    },\n \"conversations\": {\n \"external_contact\": \"{{trigger.message.ChannelAttributes.twilioNumber | replace: 'whatsapp:', ''}}\",\n \"selected_option_on_flow\": \"{{flow.variables.selectedOptionOnMainMenuClient}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.get_client_information.parsed.data.properties.guardian}}\"\n      {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n      {%endif%}\n    }\n}",
+        "waitUrlMethod": "POST"
+      }
+    },
+    {
+      "name": "flex_to_support",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1580,
+          "y": 3550
+        },
+        "workflow": "WW45f278b34e59d6f0d8cdadd75e0cc6a2",
+        "channel": "TC38f2a7207058a506929181a479717c36",
+        "attributes": "{\n\"subject\": \"send-to-support\",\n \"clientInformation\": {{widgets.get_client_information.parsed.data.properties|to_json}},\n \"customers\": {\n \"phone\": \"{{trigger.message.ChannelAttributes.from | replace: 'whatsapp:', ''}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"name\": \"{{widgets.get_client_information.parsed.data.properties.firstname}} {{widgets.get_client_information.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.get_client_information.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.get_client_information.parsed.data.properties.email}}\"\n    {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n    {%endif%}\n  },\n \"conversations\": {\n \"external_contact\": \"{{trigger.message.ChannelAttributes.twilioNumber | replace: 'whatsapp:', ''}}\",\n \"selected_option_on_flow\": \"{{flow.variables.selectedOptionOnMainMenuClient}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.get_client_information.parsed.data.properties.guardian}}\"\n    {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n    {%endif%}\n  }\n}"
+      }
+    },
+    {
+      "name": "menu_know_products",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_menu_know_products",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 690,
+          "y": 1500
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Me conta qual é o perfil da sua Empresa\n\n1 - Sou Agente de Carga\n2 - Sou Porto, Terminal ou Armazém\n3 - Sou Importador ou Exportador \n4 - Sou Despachante Aduaneiro ou Comissária de Despachos",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "know_products_opt1",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_know_products_opt1",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 830,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Legal! E quais informações você precisa buscar com as nossas soluções?\n\n1 - Identificar novas oportunidades de vendas e elaborar propostas personalizadas de maneira mais rápida e assertiva\n2 - Descobrir novas oportunidades de negócios e tendências de mercado, através de análise segmentada por produtos\n3 - Tenha a gestão completa e automatizada dos seus processos integrado seus clientes e provedores logísticos",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "know_products_opt2",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_know_products_opt2",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1510,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Legal! E quais informações você precisa buscar com as nossas soluções?\n\n1 - Identificar novas oportunidades de vendas e elaborar propostas personalizadas de maneira mais rápida e assertiva\n2 - Descobrir novas oportunidades de negócios e tendências de mercado, através de análise segmentada por produtos\n3 - Tenha a gestão completa e automatizada dos seus processos integrado seus clientes e provedores logísticos\n4 - Melhore a sua eficiência operacional e no processo de vendas e reduza seus custos de automação\n5 - Descobrir novos leads potenciais para o seu negócio, automatize o seu processo e capte novas cargas",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "know_products_opt3",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_know_products_opt3",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 2180,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Legal! E quais informações você precisa buscar com as nossas soluções?\n\n1 - Reduzir os custos das importações através de maior poder de barganha\n2 - Fazer uma análise completa e assertiva sobre o seu mercado, produtos, tendências e potenciais clientes",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "know_products_opt4",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_know_products_opt4",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 2850,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Legal! E quais informações você precisa buscar com as nossas soluções?\n\n1 - Tenha a gestão completa e automatizada dos seus processos integrado seus clientes e provedores logísticos",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_know_products_opt1",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "no_condition_know_products_opt1",
+          "event": "noMatch"
+        },
+        {
+          "next": "get_client_name",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "[1-3]",
+              "arguments": ["{{widgets.know_products_opt1.inbound.Body}}"],
+              "type": "regex",
+              "value": "[1-3]"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.know_products_opt1.inbound.Body}}",
+        "offset": {
+          "x": 820,
+          "y": 2100
+        }
+      }
+    },
+    {
+      "name": "no_condition_know_products_opt1",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "know_products_opt1",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 500,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Não entendi, pode digitar novamente?!"
+      }
+    },
+    {
+      "name": "split_know_products_opt2",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "no_condition_know_products_opt2",
+          "event": "noMatch"
+        },
+        {
+          "next": "get_client_name",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "[1-5]",
+              "arguments": ["{{widgets.know_products_opt2.inbound.Body}}"],
+              "type": "regex",
+              "value": "[1-5]"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.know_products_opt2.inbound.Body}}",
+        "offset": {
+          "x": 1510,
+          "y": 2100
+        }
+      }
+    },
+    {
+      "name": "no_condition_know_products_opt2",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "know_products_opt2",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1180,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Não entendi, pode digitar novamente?!"
+      }
+    },
+    {
+      "name": "split_know_products_opt3",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "no_condition_know_products_opt3",
+          "event": "noMatch"
+        },
+        {
+          "next": "get_client_name",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "[1-2]",
+              "arguments": ["{{widgets.know_products_opt3.inbound.Body}}"],
+              "type": "regex",
+              "value": "[1-2]"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.know_products_opt3.inbound.Body}}",
+        "offset": {
+          "x": 2180,
+          "y": 2090
+        }
+      }
+    },
+    {
+      "name": "no_condition_know_products_opt3",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "know_products_opt3",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1850,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Não entendi, pode digitar novamente?!"
+      }
+    },
+    {
+      "name": "no_condition_know_products_opt4",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "know_products_opt4",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 2520,
+          "y": 1870
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Não entendi, pode digitar novamente?!"
+      }
+    },
+    {
+      "name": "split_know_products_opt4",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "no_condition_know_products_opt4",
+          "event": "noMatch"
+        },
+        {
+          "next": "get_client_name",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": ["{{widgets.know_products_opt4.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.know_products_opt4.inbound.Body}}",
+        "offset": {
+          "x": 2850,
+          "y": 2090
+        }
+      }
+    },
+    {
+      "name": "get_client_name",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "get_client_cnpj_cpf",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1760,
+          "y": 2460
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Com certeza podemos lhe ajudar nisto!\n\nPara darmos continuidade, poderia nos informar seu nome?",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "get_client_cnpj_cpf",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "check_cnpj_cpj",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1760,
+          "y": 2720
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Agora informa para gente o CNPJ da sua empresa.",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_redirect_know_products_agents",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "flexComercialInbound",
+          "event": "noMatch"
+        },
+        {
+          "next": "flexComercialInbound",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "flexComercialInbound",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "2",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "flexComercialInbound",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "3",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "flexComercialInbound",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "4",
+              "arguments": ["{{widgets.menu_know_products.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.menu_know_products.inbound.Body}}",
+        "offset": {
+          "x": 1940,
+          "y": 3750
+        }
+      }
+    },
+    {
+      "name": "thanks_message_1",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "split_redirect_know_products_agents",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1760,
+          "y": 3410
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Obrigado pela confirmação dos dados, já estou te transferindo para um de nossos Loggers!"
+      }
+    },
+    {
+      "name": "flexComercialInbound",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1950,
+          "y": 4100
+        },
+        "workflow": "WW45f278b34e59d6f0d8cdadd75e0cc6a2",
+        "channel": "TC38f2a7207058a506929181a479717c36",
+        "attributes": "{\n\"subject\": \"send-to-comercial\",\n    \"clientInformation\": {\n    \"cnpj\": \"{{widgets.get_client_cnpj_cpf.inbound.Body}}\",\n    \"firstname\": \"{{widgets.get_client_name.inbound.Body}}\"\n    },\n    \"customers\": {\n      \"phone\": \"{{trigger.parent.parameters.customerPhone}}\",\n      {%if trigger.parent.parameters.customer%}\n      \"name\": \"{{trigger.parent.parameters.customer}}\",\n      \"organization\": \"{{trigger.parent.parameters.organization}}\",\n      \"email\": \"{{trigger.parent.parameters.customerEmail}}\"\n      {%else%}\n      \"name\": \"Cliente não encontrado\",\n      \"organization\": \"Cliente não encontrado\",\n      \"email\": \"Cliente não encontrado\"\n      {%endif%}\n    },\n    \"conversations\": {\n      \"external_contact\": \"{{trigger.message.ChannelAttributes.twilioNumber | replace: 'whatsapp:', ''}}\",\n      {%if trigger.parent.parameters.guardiao%}\n      \"conversation_attribute_2\": \"{{trigger.parent.parameters.guardiao}}\"\n      {%else%}\n      \"conversation_attribute_2\": \"Cliente não encontrado\"\n      {%endif%}\n    }\n    }"
+      }
+    },
+    {
+      "name": "send_to_logger",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "split_main_menu_client",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1590,
+          "y": 2510
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Aguarde um momento enquanto eu encontro um Logger disponível para te atender!"
+      }
+    },
+    {
+      "name": "check_client_was_found",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "get_client_name1",
+          "event": "noMatch"
+        },
+        {
+          "next": "set_variables_hubspot_id",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "true",
+              "arguments": [
+                "{{widgets.get_client_information.parsed.success}}"
+              ],
+              "type": "equal_to",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "next": "checkCount",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "false",
+              "arguments": [
+                "{{widgets.get_client_information.parsed.success}}"
+              ],
+              "type": "equal_to",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.get_client_information.parsed.success}}",
+        "offset": {
+          "x": -1230,
+          "y": 1390
+        }
+      }
+    },
+    {
+      "name": "get_client_name1",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "get_client_company",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -650,
+          "y": 1670
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Desculpe, não consegui encontrar o seu cadastro. Mas não se preocupe, vou transferir você para um Logger disponível. \n\nPoderia me confirmar seu nome?",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "check_response_1",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "no_condition_main_menu_client",
+          "event": "noMatch"
+        },
+        {
+          "next": "send_to_logger",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "[1-4]",
+              "arguments": ["{{widgets.main_menu_client.inbound.Body}}"],
+              "type": "regex",
+              "value": "[1-4]"
+            }
+          ]
+        },
+        {
+          "next": "get_hubspot_company_farmer",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "[5]",
+              "arguments": ["{{widgets.main_menu_client.inbound.Body}}"],
+              "type": "regex",
+              "value": "[5]"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.main_menu_client.inbound.Body}}",
+        "offset": {
+          "x": -1590,
+          "y": 2290
+        }
+      }
+    },
+    {
+      "name": "invalid_cnpj_cpf",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "get_client_cnpj_cpf",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 2310,
+          "y": 2720
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Ops, parece que o CNPJ informado não é válido."
+      }
+    },
+    {
+      "name": "get_client_information",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "check_client_was_found",
+          "event": "success"
+        },
+        {
+          "next": "check_client_was_found",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1220,
+          "y": 1120
+        },
+        "method": "POST",
+        "content_type": "application/json;charset=utf-8",
+        "body": "{\n\"typeSearch\": \"{{flow.variables.typeSearch}}\",\n\"clientEmail\": \"{{flow.variables.value}}\"\n}",
+        "url": "https://serverless-functions-4443-dev.twil.io/hubspot-integration/search-client"
+      }
+    },
+    {
+      "name": "check_cnpj_cpj",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "check_cnpj_cpf_is_valid",
+          "event": "success"
+        },
+        {
+          "next": "check_cnpj_cpf_is_valid",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 1760,
+          "y": 2940
+        },
+        "method": "POST",
+        "content_type": "application/json;charset=utf-8",
+        "body": "{\n\"clientDocument\":  \"{{widgets.get_client_cnpj_cpf.inbound.Body}}\" \n}",
+        "url": "https://serverless-functions-4443-dev.twil.io/utils/check-cnpj-cpf"
+      }
+    },
+    {
+      "name": "check_cnpj_cpf_is_valid",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "invalid_cnpj_cpf",
+          "event": "noMatch"
+        },
+        {
+          "next": "thanks_message_1",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "true",
+              "arguments": ["{{widgets.check_cnpj_cpj.parsed.success}}"],
+              "type": "equal_to",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "next": "invalid_cnpj_cpf",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "false",
+              "arguments": ["{{widgets.check_cnpj_cpj.parsed.success}}"],
+              "type": "equal_to",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.check_cnpj_cpj.parsed.success}}",
+        "offset": {
+          "x": 1760,
+          "y": 3190
+        }
+      }
+    },
+    {
+      "name": "get_client_company",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "flex_to_support",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "finalizacao_no_reply",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -660,
+          "y": 1920
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Poderia informar o nome da empresa?",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "setVariablesToSearchClient",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "get_client_information",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "mobilephone",
+            "key": "typeSearch"
+          },
+          {
+            "value": "{{trigger.message.ChannelAttributes.from}}",
+            "key": "value"
+          },
+          {
+            "value": "0",
+            "key": "count"
+          }
+        ],
+        "offset": {
+          "x": -1220,
+          "y": 840
+        }
+      }
+    },
+    {
+      "name": "checkCount",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "get_client_email",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "0",
+              "arguments": ["{{flow.variables.count}}"],
+              "type": "equal_to",
+              "value": "0"
+            }
+          ]
+        },
+        {
+          "next": "get_client_name1",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": ["{{flow.variables.count}}"],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.count}}",
+        "offset": {
+          "x": -860,
+          "y": 1370
+        }
+      }
+    },
+    {
+      "name": "setVariablesToSearchClient1",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "get_client_information",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "email",
+            "key": "typeSearch"
+          },
+          {
+            "value": "{{widgets.get_client_email.inbound.Body}}",
+            "key": "value"
+          },
+          {
+            "value": "1",
+            "key": "count"
+          }
+        ],
+        "offset": {
+          "x": -490,
+          "y": 1370
+        }
+      }
+    },
+    {
+      "name": "isWorking",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "checkIsWorking",
+          "event": "success"
+        },
+        {
+          "next": "checkIsWorking",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 60,
+          "y": 10
+        },
+        "method": "POST",
+        "content_type": "application/json;charset=utf-8",
+        "url": "https://serverless-functions-4443-dev.twil.io/utils/check-business-hour"
+      }
+    },
+    {
+      "name": "checkIsWorking",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "out_business_hour",
+          "event": "noMatch"
+        },
+        {
+          "next": "main_menu_clientes",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "true",
+              "arguments": ["{{widgets.isWorking.parsed.success}}"],
+              "type": "equal_to",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "next": "out_business_hour",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "false",
+              "arguments": ["{{widgets.isWorking.parsed.success}}"],
+              "type": "equal_to",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.isWorking.parsed.success}}",
+        "offset": {
+          "x": 60,
+          "y": 350
+        }
+      }
+    },
+    {
+      "name": "out_business_hour",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 680,
+          "y": 310
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "No momento não temos nenhum agente disponível para lhe atender.\nNosso horário de atendimento é de segunda à sexta das 08h às 18h\nFique à vontade para nos acionar via e-mail através dos endereços:\nguardioes@logcomex.com\nsuporte@logcomex.com"
+      }
+    },
+    {
+      "name": "split_check_if_wants_to_change_number",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "ask_to_change_number",
+          "event": "noMatch"
+        },
+        {
+          "next": "main_menu_client",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value not_equal_to email",
+              "arguments": ["{{flow.variables.typeSearch}}"],
+              "type": "not_equal_to",
+              "value": "email"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.typeSearch}}",
+        "offset": {
+          "x": -2330,
+          "y": 1590
+        }
+      }
+    },
+    {
+      "name": "ask_to_change_number",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_check_change_number_reply",
+          "event": "incomingMessage"
+        },
+        {
+          "next": "main_menu_client",
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -2560,
+          "y": 1830
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Vimos que está usando um número diferente do cadastrado.\nDeseja atualizar para *{{trigger.message.ChannelAttributes.from | replace:'whatsapp:', ''}}*?\n\n1 - Sim\n2 - Não",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_check_change_number_reply",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "function_update_number",
+          "event": "noMatch"
+        },
+        {
+          "next": "main_menu_client",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": ["{{widgets.ask_to_change_number.inbound.Body}}"],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.ask_to_change_number.inbound.Body}}",
+        "offset": {
+          "x": -2900,
+          "y": 2110
+        }
+      }
+    },
+    {
+      "name": "function_update_number",
+      "type": "run-function",
+      "transitions": [
+        {
+          "next": "send_message_change_number_confirmation",
+          "event": "success"
+        },
+        {
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZS94a60054fb8b17808bdccffc44d1d2d0",
+        "environment_sid": "ZE59c5da4f5ff7e98f2ce35f39df892e5d",
+        "offset": {
+          "x": -2930,
+          "y": 2370
+        },
+        "function_sid": "ZHc9e317c8d7798361d3c8266b3e654915",
+        "parameters": [
+          {
+            "value": "{{widgets.get_client_information.parsed.data.properties.hs_object_id}}",
+            "key": "hubspot_id"
+          },
+          {
+            "value": "{{trigger.message.ChannelAttributes.from}}",
+            "key": "newNumber"
+          }
+        ],
+        "url": "https://serverless-functions-4443-dev.twil.io/hubspot-integration/update-info"
+      }
+    },
+    {
+      "name": "send_message_change_number_confirmation",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "main_menu_client",
+          "event": "sent"
+        },
+        {
+          "next": "main_menu_client",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -2290,
+          "y": 2600
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "{% if widgets.function_update_number.parsed.success %} \nCadastro atualizado com sucesso!\n\n{% else %}\nNão consegui atualizar o seu cadastro, mas você pode pedir para o agente atualizar para você!\n\n{% endif %}"
+      }
+    },
+    {
+      "name": "main_menu_clientes",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "setVariablesToSearchClient",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -170,
+          "y": 670
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Olá, esse é o Whatsapp para clientes da LogComex!\n\nVamos identificar seu cadastro para melhor atendê-lo!\n\nCaso não seja cliente, acesse nosso site e solicite uma demonstração, é bem rápido!\n\nhttps://www.logcomex.com/"
+      }
+    },
+    {
+      "name": "set_variables_hubspot_id",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "split_check_if_wants_to_change_number",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.get_client_information.parsed.data.properties.hs_object_id}}",
+            "key": "hubspot_id"
+          }
+        ],
+        "offset": {
+          "x": -1850,
+          "y": 1340
+        }
+      }
+    },
+    {
+      "name": "flex_to_farmer_expansao",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1150,
+          "y": 3050
+        },
+        "workflow": "WW45f278b34e59d6f0d8cdadd75e0cc6a2",
+        "channel": "TC38f2a7207058a506929181a479717c36",
+        "attributes": "{\n  \"isFarmerActive\": \"true\",\n  \"farmerToSend\": \"{{widgets.get_hubspot_company_farmer.parsed.farmerEmail}}\",\n  \"clientInformation\": {{widgets.get_client_information.parsed.data.properties|to_json}},\n  \"customers\": {\n    \"phone\": \"{{trigger.message.ChannelAttributes.from | replace: 'whatsapp:', ''}}\",\n    {%if widgets.get_client_information.parsed.success%}\n    \"name\": \"{{widgets.get_client_information.parsed.data.properties.firstname}} {{widgets.get_client_information.parsed.data.properties.lastname}}\",\n    \"organization\": \"{{widgets.get_client_information.parsed.data.properties.company}}\",\n    \"email\": \"{{widgets.get_client_information.parsed.data.properties.email}}\"\n    {%else%}\n    \"name\": \"Cliente não encontrado\",\n    \"organization\": \"Cliente não encontrado\",\n    \"email\": \"Cliente não encontrado\"\n    {%endif%}\n  },\n  \"conversations\": {\n    \"selected_option_on_flow\": \"{{flow.variables.selectedOptionOnMainMenuClient}}\",\n    \"external_contact\": \"{{trigger.message.ChannelAttributes.twilioNumber | replace: 'whatsapp:', ''}}\",\n    {%if widgets.get_client_information.parsed.success%}\n    \"conversation_attribute_2\": \"{{widgets.get_client_information.parsed.data.properties.guardian}}\"\n    {%else%}\n    \"conversation_attribute_2\": \"Cliente não encontrado\"\n    {%endif%}\n  }\n}"
+      }
+    },
+    {
+      "name": "send_to_logger_farmer",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "flex_to_farmer_expansao",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1150,
+          "y": 2790
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Aguarde um momento enquanto eu encontro um Logger disponível para te atender!"
+      }
+    },
+    {
+      "name": "get_hubspot_company_farmer",
+      "type": "run-function",
+      "transitions": [
+        {
+          "next": "send_to_logger_farmer",
+          "event": "success"
+        },
+        {
+          "next": "send_to_logger_farmer",
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZS94a60054fb8b17808bdccffc44d1d2d0",
+        "environment_sid": "ZE59c5da4f5ff7e98f2ce35f39df892e5d",
+        "offset": {
+          "x": -1150,
+          "y": 2510
+        },
+        "function_sid": "ZH9d16df15f9ba09a49f2a9f70b4ecb8d8",
+        "parameters": [
+          {
+            "value": "{{widgets.get_client_information.parsed.data.properties.associatedcompanyid}}",
+            "key": "company_id"
+          }
+        ],
+        "url": "https://serverless-functions-4443-dev.twil.io/hubspot-integration/get-hubspot-company-farmer"
+      }
+    },
+    {
+      "name": "variableSelectedOptionMainMenuClient",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "check_response_1",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{% case widgets.main_menu_client.inbound.Body %}{% when \"1\"%}1 - Falar com um Logger Guardião sobre a sua Empresa ou assinatura{% when \"2\"%}2 - Falar com um Logger de Suporte{% when \"3\"%}3 - Falar com um Logger sobre assuntos financeiros{% when \"4\"%}4 - Tratar renovação de contrato{% when \"5\"%}5 - Contratar nova funcionalidade/plano{% else %}Cliente não identificado no Hubspot{% endcase %}",
+            "key": "selectedOptionOnMainMenuClient"
+          }
+        ],
+        "offset": {
+          "x": -1560,
+          "y": 2000
+        }
+      }
+    },
+    {
+      "name": "httpValidateGuardianActivity",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "splitGuardianActivity",
+          "event": "success"
+        },
+        {
+          "next": "splitGuardianActivity",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -2490,
+          "y": 3320
+        },
+        "method": "POST",
+        "content_type": "application/json;charset=utf-8",
+        "body": "{\n\"workerEmail\":\"{{widgets.get_client_information.parsed.data.properties.guardian}}\"\n}",
+        "url": "https://serverless-functions-4443-dev.twil.io/utils/validate-worker-available"
+      }
+    },
+    {
+      "name": "splitGuardianActivity",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "flex_to_guardian_queue",
+          "event": "noMatch"
+        },
+        {
+          "next": "flex_to_guardian",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "worker",
+              "arguments": [
+                "{{widgets.httpValidateGuardianActivity.parsed.to}}"
+              ],
+              "type": "equal_to",
+              "value": "worker"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.httpValidateGuardianActivity.parsed.to}}",
+        "offset": {
+          "x": -2140,
+          "y": 3340
+        }
+      }
+    },
+    {
+      "name": "flex_to_guardian_queue",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -2270,
+          "y": 3560
+        },
+        "workflow": "WWfcbc3317b162e102e4165f32a71e29c9",
+        "channel": "TC38f2a7207058a506929181a479717c36",
+        "attributes": "{\n\"subject\": \"send-to-{{widgets.get_client_information.parsed.data.properties.guardianSkill}}\",\n \"clientInformation\":{{widgets.get_client_information.parsed.data.properties|to_json}},\n \"customers\": {\n \"phone\": \"{{trigger.message.ChannelAttributes.from | replace: 'whatsapp:', ''}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"name\": \"{{widgets.get_client_information.parsed.data.properties.firstname}} {{widgets.get_client_information.parsed.data.properties.lastname}}\",\n \"organization\": \"{{widgets.get_client_information.parsed.data.properties.company}}\",\n \"email\": \"{{widgets.get_client_information.parsed.data.properties.email}}\"\n      {%else%}\n \"name\": \"Cliente não encontrado\",\n \"organization\": \"Cliente não encontrado\",\n \"email\": \"Cliente não encontrado\"\n      {%endif%}\n    },\n \"conversations\": {\n \"external_contact\": \"{{trigger.message.ChannelAttributes.twilioNumber | replace: 'whatsapp:', ''}}\",\n \"selected_option_on_flow\": \"{{flow.variables.selectedOptionOnMainMenuClient}}\",\n {%if widgets.get_client_information.parsed.success%}\n \"conversation_attribute_2\": \"{{widgets.get_client_information.parsed.data.properties.guardian}}\"\n      {%else%}\n \"conversation_attribute_2\": \"Cliente não encontrado\"\n      {%endif%}\n    }\n}",
+        "waitUrlMethod": "POST"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
