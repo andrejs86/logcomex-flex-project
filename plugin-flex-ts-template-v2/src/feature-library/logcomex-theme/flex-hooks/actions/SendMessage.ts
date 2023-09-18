@@ -6,11 +6,10 @@ export const actionEvent = FlexActionEvent.replace;
 export const actionName = 'SendMessage';
 
 export const actionHook = function addAgentNameToConversation(flex: typeof Flex, manager: Flex.Manager) {
-  flex.Actions.replaceAction(`${actionEvent}${actionName}`, async (payload, original) => {
+  flex.Actions.replaceAction(`${actionName}`, async (payload, original) => {
     const newPayload = payload;
     if ((manager.workerClient?.attributes as any)?.full_name) {
-      const newBody = `*${(manager.workerClient?.attributes as any).full_name}:*\n${payload.body}`;
-      payload.body = newBody;
+      newPayload.body = `*${(manager.workerClient?.attributes as any).full_name}:* \n${payload.body}`;
     }
     original(newPayload);
   });
