@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Input, Label, Select, Option, useToaster } from '@twilio-paste/core';
+import { Input, Label, Text, useToaster, Combobox, Badge } from '@twilio-paste/core';
+import { MediaObject, MediaFigure, MediaBody } from '@twilio-paste/core/media-object';
 import { Form, FormControl, FormActions } from '@twilio-paste/core/form';
 import { Grid, Column } from '@twilio-paste/core/grid';
 import { Heading } from '@twilio-paste/core/heading';
@@ -29,12 +30,17 @@ const WhatsappSenderView = ({ manager }) => {
   useEffect(() => {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const phone = urlParams.get('phone');
+    let phone = urlParams.get('phone');
+    if (phone && phone?.endsWith('/')) {
+      phone = phone.replace('/', '');
+    }
 
+    console.log('received phone from QueryString', phone);
     if (phone) setPhone(phone);
 
     async function getAllTemplates() {
       try {
+        setLoading(true);
         const data = await WhatsappSenderService.getTemplates();
         if (data.success) {
           setTemplates(data.templatesFiltered);
@@ -45,13 +51,15 @@ const WhatsappSenderView = ({ manager }) => {
           variant: 'error',
           dismissAfter: 5000,
         });
+      } finally {
+        setLoading(false);
       }
     }
 
     getAllTemplates();
   }, []);
 
-  function handleChangeSelect(value) {
+  function handleSelectTemplate(value) {
     setReplacedTemplate([]);
     let replacedModel = '';
     const splittedContent = value.split('{{');
@@ -65,7 +73,6 @@ const WhatsappSenderView = ({ manager }) => {
         .replace('5}}', '');
       return { var: index, string };
     });
-
     setReplacedTemplate(replacedModel);
   }
 
@@ -78,11 +85,11 @@ const WhatsappSenderView = ({ manager }) => {
     setAllTestVars(newArray);
   }
 
-  async function sendMessage(e) {
+  const sendMessage = (e) => {
+    console.log('Sending Whatsapp message...');
     e.preventDefault();
     setLoading(true);
     const checkTemplateHasVariable = /\{\{/g;
-
     let templateReplaced = '';
 
     if (checkTemplateHasVariable.test(templateFiltered)) {
@@ -94,31 +101,47 @@ const WhatsappSenderView = ({ manager }) => {
       templateReplaced = templateFiltered;
     }
 
-    const data = await WhatsappSenderService.sendMessage({
+    WhatsappSenderService.sendMessage({
       clientNumber: phone,
       templateContent: templateReplaced,
-    });
-
-    setLoading(false);
-    if (!data.success) {
-      toaster.push({
-        message: 'Erro para enviar mensagem, verifique os dados digitados',
-        variant: 'error',
-        dismissAfter: 5000,
+    })
+      .then((data) => {
+        if (data.success) {
+          console.log('Whatsapp message sent to', phone);
+          toaster.push({
+            message: 'Mensagem enviada com sucesso! :D',
+            variant: 'success',
+            dismissAfter: 5000,
+          });
+        } else {
+          toaster.push({
+            message: 'Erro para enviar mensagem, verifique os dados digitados',
+            variant: 'error',
+            dismissAfter: 5000,
+          });
+        }
+      })
+      .catch(() => {
+        console.error('Could not send Whatsapp message. Check serverless functions');
+        toaster.push({
+          message: 'Erro para enviar mensagem, verifique os dados digitados',
+          variant: 'error',
+          dismissAfter: 5000,
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+        setPhone('');
+        setTemplateFiltered('');
+        setAllTestVars([
+          { id: 0, value: '', string: '' },
+          { id: 1, value: '', string: '' },
+          { id: 2, value: '', string: '' },
+          { id: 3, value: '', string: '' },
+          { id: 4, value: '', string: '' },
+        ]);
+        setReplacedTemplate([]);
       });
-      return;
-    }
-
-    setPhone('');
-    setTemplateFiltered('');
-    setAllTestVars([
-      { id: 0, value: '', string: '' },
-      { id: 1, value: '', string: '' },
-      { id: 2, value: '', string: '' },
-      { id: 3, value: '', string: '' },
-      { id: 4, value: '', string: '' },
-    ]);
-    setReplacedTemplate([]);
 
     if (manager && manager.workerClient && manager.workerClient.attributes && manager.workerClient.attributes.email) {
       const date = new Date();
@@ -126,20 +149,19 @@ const WhatsappSenderView = ({ manager }) => {
 
       const messageFormatted = `${dateFormatted} - ${templateReplaced}`;
 
-      await HubspotService.UpdateInfo({
-        newNumber: manager.workerClient.attributes.email,
-        messagePropertyValue: true,
-        search: phone,
-        message: messageFormatted,
-      });
+      try {
+        console.log('updating Hubspot');
+        HubspotService.UpdateInfo({
+          newNumber: manager.workerClient.attributes.email,
+          messagePropertyValue: true,
+          search: phone,
+          message: messageFormatted,
+        }).then(() => console.log('Hubspot updated'));
+      } catch (err) {
+        console.error('Could not update Hubspot', err);
+      }
     }
-
-    toaster.push({
-      message: 'Mensagem enviada com sucesso! :D',
-      variant: 'success',
-      dismissAfter: 5000,
-    });
-  }
+  };
 
   return (
     <>
@@ -148,7 +170,7 @@ const WhatsappSenderView = ({ manager }) => {
           <Spinner decorative={false} title="Carregando..." />;
         </LoadingContainer>
       )}
-      <Form onSubmit={sendMessage} aria-labelledby="wa-form-heading" element="WA_FORM">
+      <Form aria-labelledby="wa-form-heading" element="WA_FORM">
         <Heading as="h1" variant="heading10" id="wa-form-heading" marginBottom="space0">
           Disparador de Mensagem Whatsapp
         </Heading>
@@ -164,44 +186,52 @@ const WhatsappSenderView = ({ manager }) => {
                 type="tel"
                 placeholder="+55 ## #####-#####"
                 value={phone}
-                onChange={(e) => setPhone(e.value)}
+                onChange={(e) => setPhone(e.target.value)}
                 required
               />
             </FormControl>
             <FormControl element="WA_FORM_CONTROL">
               <Label htmlFor="wa-template">Template:</Label>
-              <Select
-                id="wa-template"
-                value={templateFiltered}
+              <Combobox
+                items={templates}
+                labelText="Selecione um template"
+                initialSelectedItem={templateFiltered}
+                optionTemplate={(item) => (
+                  <MediaObject verticalAlign="center">
+                    <MediaBody>
+                      <Text as="span">{item.name}</Text>
+                    </MediaBody>
+                    {item.language && (
+                      <>
+                        <Text as="span">&nbsp;</Text>
+                        <MediaFigure spacing="space30">
+                          <Badge as="span" variant="decorative10">
+                            {item.language.replace('_', '-').toUpperCase()}
+                          </Badge>
+                        </MediaFigure>
+                      </>
+                    )}
+                  </MediaObject>
+                )}
                 required
-                onChange={(e) => {
-                  setTemplateFiltered(e.target.value);
-                  handleChangeSelect(e.target.value);
+                onSelectedItemChange={(e) => {
+                  handleSelectTemplate(e.selectedItem.content);
+                  setTemplateFiltered(e.selectedItem.content);
                 }}
-              >
-                <Option hidden value="">
-                  {templates && templates.length > 0 ? 'Selecione um template' : 'Não há templates disponíveis'}
-                </Option>
-                {templates &&
-                  templates.length > 0 &&
-                  templates.map((template) => {
-                    return (
-                      <Option key={template.content} value={template.content}>
-                        {template.name}
-                      </Option>
-                    );
-                  })}
-              </Select>
+                itemToString={(item) => (item ? String(item.name) : null)}
+              />
             </FormControl>
             {replacedTemplate &&
               replacedTemplate.map((temp, index) => (
-                <FormControl element="WA_FORM_CONTROL">
+                <FormControl element="WA_FORM_CONTROL" key={`wa-template-formcontrol-var${index}`}>
                   {index + 1 !== replacedTemplate.length && (
                     <Input
+                      key={`wa-template-input-var${index}`}
                       id={`wa-template-var${index}`}
                       onChange={({ target }) => {
                         setTestVars(temp.var, target.value);
                       }}
+                      type="text"
                       required
                       placeholder={`Variável ${index + 1}`}
                       value={allTestVars[index].value}
@@ -216,9 +246,10 @@ const WhatsappSenderView = ({ manager }) => {
               <p>{templateFiltered || 'Selecione um template para ver o preview'}</p>
             </Preview>
           </Column>
+          <Column></Column>
         </Grid>
         <FormActions>
-          <Button variant="primary" disabled={!phone || !templateFiltered}>
+          <Button variant="primary" disabled={!phone || !templateFiltered} onClick={sendMessage}>
             Enviar mensagem
           </Button>
         </FormActions>

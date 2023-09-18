@@ -2,7 +2,7 @@
   "task_routing": {
     "filters": [],
     "default_filter": {
-      "queue": "WQb4845f1eab5ad9f867af1799cd834dec"
+      "queue": "${QUEUE_SID_TRACKER}"
     }
   }
 }

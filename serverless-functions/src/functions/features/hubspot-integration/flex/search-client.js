@@ -114,6 +114,7 @@ exports.handler = async (context, event, callback) => {
       ],
     };
     const { data: contacts } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/contacts/search`, bodyRequest);
+    console.log('contacts found', contacts);
 
     if (contacts.results.length > 0) {
       let workerSid;
@@ -139,15 +140,28 @@ exports.handler = async (context, event, callback) => {
         }
 
         if (guardian) {
-          const workers = await client.taskrouter.workspaces(context.TWILIO_WORKSPACE_SID).workers.list({
+          console.log('guardian found', guardian);
+          const workers = await client.taskrouter.v1.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).workers.list({
             targetWorkersExpression: `email == "${guardian}"`,
           });
 
-          const workerAttributes = JSON.parse(workers[0].attributes);
-          guardianSkill = workerAttributes.routing.skills[0];
+          if (workers?.length > 0) {
+            const workerAttributes = JSON.parse(workers[0].attributes);
+            // eslint-disable-next-line max-depth
+            if (workerAttributes?.routing?.skills?.length > 0) {
+              guardianSkill = workerAttributes?.routing?.skills[0];
+            } else {
+              console.log('no guardian skill was found');
+            }
 
-          if (workers.length > 0) workerSid = workers[0].sid;
+            workerSid = workers[0].sid;
+            console.log('guardian worker was found', workerSid);
+          } else {
+            console.log('guardian is probably not a Flex user');
+          }
         }
+      } else {
+        console.log('no guardian for this contact');
       }
 
       response.setBody({

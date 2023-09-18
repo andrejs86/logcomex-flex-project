@@ -8,12 +8,14 @@ exports.handler = async (context, event, callback) => {
   const client = context.getTwilioClient();
   const { clientNumber, templateContent } = event;
 
+  console.log('Sending Whatsapp Message...', clientNumber, templateContent);
+
   if (!clientNumber) {
     response.setBody({
       success: false,
       message: 'Client number is undefined',
     });
-
+    console.log('No client number was provided');
     return callback(null, response);
   }
 
@@ -22,7 +24,7 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: 'Template content is undefined',
     });
-
+    console.log('No template content was provided.');
     return callback(null, response);
   }
 

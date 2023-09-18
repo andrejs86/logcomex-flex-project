@@ -12,14 +12,12 @@ class AdminUiService extends ApiService {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
       };
 
-      this.fetchJsonWithReject<AdminUiServiceReponse>(
-        `${this.serverlessProtocol}://${this.serverlessDomain}/features/admin-ui/flex/fetch-config`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: this.buildBody(encodedParams),
-        },
-      )
+      const fetchConfigURL = `${this.serverlessProtocol}://${this.serverlessDomain}/features/admin-ui/flex/fetch-config`;
+      this.fetchJsonWithReject<AdminUiServiceReponse>(fetchConfigURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: this.buildBody(encodedParams),
+      })
         .then((response) => {
           resolve(response);
         })

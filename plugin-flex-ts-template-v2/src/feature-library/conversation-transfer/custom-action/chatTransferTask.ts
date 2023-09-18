@@ -1,4 +1,4 @@
-import { Actions, Notifications, StateHelper } from '@twilio/flex-ui';
+import { Actions, Manager, Notifications, StateHelper, TaskHelper } from '@twilio/flex-ui';
 
 import { TransferActionPayload } from '../types/ActionPayloads';
 import { NotificationIds } from '../flex-hooks/notifications/TransferResult';
@@ -8,9 +8,9 @@ import { countOfOutstandingInvitesForConversation } from '../helpers/inviteTrack
 
 const handleChatTransferAction = async (payload: TransferActionPayload) => {
   const { task, targetSid } = payload;
-  console.log('transfer', payload);
-
   const conversation = StateHelper.getConversationStateForTask(task);
+
+  console.log('transfer started', payload);
 
   if (conversation && countOfOutstandingInvitesForConversation(conversation) !== 0) {
     Notifications.showNotification(NotificationIds.ChatCancelParticipantInviteFailedInviteOutstanding);
@@ -48,6 +48,29 @@ const handleChatTransferAction = async (payload: TransferActionPayload) => {
     } else {
       Notifications.showNotification(NotificationIds.ChatParticipantInvited);
     }
+
+    console.log('Transfer sucessful. Adding to transfer history...');
+
+    let transfers = payload.task.attributes?.transfers;
+    if (!transfers) transfers = new Array<any>();
+    const targetName = payload.targetSid.startsWith('WK')
+      ? ((await Manager.getInstance().workspaceClient?.fetchWorker(payload.targetSid))?.attributes as any)?.full_name ??
+        payload.targetSid
+      : (await Manager.getInstance().workspaceClient?.fetchTaskQueue(payload.targetSid))?.queueName ??
+        payload.targetSid;
+
+    transfers.push({
+      targetSid: payload.targetSid,
+      targetName,
+      workerName: Manager.getInstance().user.identity,
+      workerFullName: (Manager.getInstance().workerClient?.attributes as any)?.full_name,
+    });
+
+    await payload.task.setAttributes({
+      ...payload.task.attributes,
+      transfers,
+    });
+    console.log('successfully added transfer history', transfers);
   } catch (error) {
     console.error('transfer API request failed', error);
     Notifications.showNotification(NotificationIds.ChatTransferFailedGeneric);

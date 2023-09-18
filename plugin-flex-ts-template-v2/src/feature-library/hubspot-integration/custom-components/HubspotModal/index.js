@@ -76,6 +76,7 @@ const HubspotModal = ({ worker }) => {
   };
 
   const whatsappMessage = (phone) => {
+    console.log(phone);
     Actions.invokeAction('NavigateToView', {
       viewName: `whatsapp-view?phone=+${phone}`,
     });
@@ -188,7 +189,6 @@ const HubspotModal = ({ worker }) => {
                             <Button
                               variant="secondary"
                               disabled={!worker.activity.available}
-                              title={!worker.activity.available && activityMessage}
                               onClick={() => outboundCall(company.phone)}
                             >
                               <Icon icon="CallBold" />
@@ -242,7 +242,6 @@ const HubspotModal = ({ worker }) => {
                             <Button
                               variant="secondary"
                               disabled={!worker.activity.available}
-                              title={!worker.activity.available && activityMessage}
                               onClick={() => outboundCall(contact.phone)}
                             >
                               <Icon icon="CallBold" />
@@ -258,7 +257,6 @@ const HubspotModal = ({ worker }) => {
                             <Button
                               variant="secondary"
                               disabled={!worker.activity.available}
-                              title={!worker.activity.available && activityMessage}
                               onClick={() => outboundCall(contact.mobilePhone)}
                             >
                               <Icon icon="CallBold" />

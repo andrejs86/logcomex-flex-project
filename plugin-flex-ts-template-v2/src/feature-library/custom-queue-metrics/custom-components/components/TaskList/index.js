@@ -7,7 +7,7 @@ import { Container, TaskHeader } from './styles';
 import TransferModal from '../TransferModal';
 
 const TaskList = ({ tasksByQueue, title, status, Icon, tile, setModalOpened, closeModal }) => {
-  const urlFinishTask = `${process.env.REACT_APP_SERVERLESS_FUNCTION_DOMAIN}/task-update/cancel-or-complete`;
+  const urlFinishTask = `https://${process.env.FLEX_APP_SERVERLESS_FUNCTONS_DOMAIN}/task-update/cancel-or-complete`;
 
   async function completeTask(taskSid, customer, task) {
     const errorText = `Falha ao finalizar a tarefa do cliente ${customer} - Tente novamente - Erro:`;

@@ -7,7 +7,7 @@ exports.handler = async (context, event, callback) => {
   response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
   response.appendHeader('Content-Type', 'application/json');
 
-  const tokenAuthorization = `${context.ACCOUNT_SID}:${context.AUTH_TOKEN}`;
+  const tokenAuthorization = `${context.TWILIO_API_KEY}:${context.TWILIO_API_SECRET}`;
   const buffer = Buffer.from(tokenAuthorization);
 
   const tokenFormatted = buffer.toString('base64');

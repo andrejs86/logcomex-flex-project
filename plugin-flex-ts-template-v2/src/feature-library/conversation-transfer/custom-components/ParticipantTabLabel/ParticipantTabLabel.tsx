@@ -9,14 +9,17 @@ export const ParticipantTabLabelContainer = () => {
       {(context) => {
         const participantCount = context.conversation?.participants?.size as number;
 
-        return (
-          <Stack orientation="horizontal" spacing="space20">
-            <Template source={templates[StringTemplates.Participants]} />
-            <Badge as="span" variant="info">
-              {participantCount}
-            </Badge>
-          </Stack>
-        );
+        if (participantCount && participantCount > 0) {
+          return (
+            <Stack orientation="horizontal" spacing="space20">
+              <Template source={templates[StringTemplates.Participants]} />
+              <Badge as="span" variant="info" element="PARTICIPANT_BADGE">
+                {participantCount}
+              </Badge>
+            </Stack>
+          );
+        }
+        return <></>;
       }}
     </TaskContext.Consumer>
   );

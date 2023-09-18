@@ -3,6 +3,8 @@ const axios = require('axios');
 const OBJECTS_URL = `/crm/v3/objects`;
 
 exports.handler = async (context, event, callback) => {
+  console.log('Hubspot Search Client Modal: ', event?.value);
+
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');
   response.appendHeader('Access-Control-Allow-Methods', 'OPTIONS, POST, GET');
@@ -10,6 +12,13 @@ exports.handler = async (context, event, callback) => {
   response.appendHeader('Content-Type', 'application/json');
 
   const { value } = event;
+
+  if (context.HUBSPOT_API_TOKEN) {
+    console.log('Hubspot API Token is correctly set.');
+  } else {
+    console.log('Hubspot API Token is not set. Throwing...');
+    throw new Error('Hubspot API token not set');
+  }
 
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
@@ -106,7 +115,6 @@ exports.handler = async (context, event, callback) => {
     };
 
     const { data: contacts } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/contacts/search`, bodyRequest);
-
     const { data: companies } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/companies/search`, companyBodyRequest);
 
     if (contacts.total === 0 && companies.total === 0) {

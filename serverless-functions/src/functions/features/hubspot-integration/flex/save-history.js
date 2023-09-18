@@ -24,11 +24,11 @@ async function getMessages(conversationSid, createdTaskDate) {
 async function getHistoryMessageAndFormat(conversationSid, messagesFiltered, taskAttributes) {
   let noteMessage = `<b>Nova conversa Whatsapp</b><br><i>(ID da conversa: ${conversationSid}</i><br><br>`;
 
-  const firedMessage = taskAttributes.clientInformation.ultima_mensagem_disparada;
+  const firedMessage = taskAttributes.clientInformation?.ultima_mensagem_disparada;
 
   if (
-    taskAttributes.clientInformation.atendimento_ativo_por &&
-    taskAttributes.clientInformation.atendimento_ativo_por !== ''
+    taskAttributes.clientInformation?.atendimento_ativo_por &&
+    taskAttributes.clientInformation?.atendimento_ativo_por !== ''
   ) {
     noteMessage += `<b>Mensagem Disparada</b><br>${firedMessage}<br><br>`;
   }

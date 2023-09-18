@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@twilio-paste/core/button';
+import { TextArea } from '@twilio-paste/core/textarea';
+import { Label } from '@twilio-paste/core/label';
 import { Modal, ModalBody, ModalFooter, ModalFooterActions, ModalHeader, ModalHeading } from '@twilio-paste/core/modal';
 
 export function SaveTaskDetails(props) {
@@ -28,10 +30,14 @@ export function SaveTaskDetails(props) {
             </ModalHeading>
           </ModalHeader>
           <ModalBody>
-            <div>
-              <span>Descreva o atendimento:</span>
-            </div>
-            <textarea style={{ width: '100%' }} rows={20} id="task-details-text" defaultValue={taskDetails} />
+            <Label htmlFor="task-details-text">Descreva o atendimento:</Label>
+            <TextArea
+              aria-describedby="message_help_text"
+              id="task-details-text"
+              defaultValue={props.task.attributes.taskDetails}
+              name="task-details-text"
+              resize="vertical"
+            />
           </ModalBody>
           <ModalFooter>
             <ModalFooterActions>

@@ -3,6 +3,7 @@ import SaveReasonConfig from './types/ServiceConfiguration';
 
 const {
   enabled = false,
+  wrapupTimeout = 120,
   reasons = [
     {
       topic: 'Cliente Logcomex',
@@ -25,4 +26,8 @@ export const getReasonsByTopic = (topic: string) => {
 
 export const getAllReasons = () => {
   return reasons;
+};
+
+export const getWrapupTimeout = () => {
+  return wrapupTimeout;
 };

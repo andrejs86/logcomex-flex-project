@@ -1,205 +1,219 @@
-// import * as Flex from '@twilio/flex-ui';
-// import { Icon } from '@twilio/flex-ui';
-// import axios from 'axios';
+import * as Flex from '@twilio/flex-ui';
+import { VolumeOnIcon } from '@twilio-paste/icons/esm/VolumeOnIcon';
+import { Button } from '@twilio-paste/button';
+import axios from 'axios';
 
-// import { FlexComponent } from '../../../../types/feature-loader';
-// import SaveHistoryCall from '../../custom-components/SaveHistoryCall';
+import * as config from '../../config';
+import { FlexComponent } from '../../../../types/feature-loader';
 
-// const CANCELED_STATUS = 'canceled';
-// const PENDING_STATUS = 'pending';
+const CANCELED_STATUS = 'canceled';
+const PENDING_STATUS = 'pending';
 
-// const isCanceled = (reservation: any) =>
-//   reservation.status === CANCELED_STATUS || reservation.task.status === CANCELED_STATUS;
+const isCanceled = (reservation: any) =>
+  reservation.status === CANCELED_STATUS || reservation.task.status === CANCELED_STATUS;
 
-// const validateGuardian = (reservation: any) => {
-//   return (
-//     reservation?.task?.attributes &&
-//     reservation?.task?.attributes?.conversations &&
-//     reservation?.task?.attributes?.conversations.conversation_attribute_2 !== reservation._worker.attributes?.full_name
-//   );
-// };
+const validateGuardian = (reservation: any) => {
+  return (
+    reservation?.task?.attributes &&
+    reservation?.task?.attributes?.conversations &&
+    reservation?.task?.attributes?.conversations.conversation_attribute_2 !== reservation._worker.attributes?.full_name
+  );
+};
 
-// export const componentName = FlexComponent.MainHeader;
-// export const componentHook = function addSoundControlsToMainHeader(flex: typeof Flex, manager: Flex.Manager) {
-//   let mediaId: string;
+export const componentName = FlexComponent.MainHeader;
+export const componentHook = function addSoundControlsToMainHeader(flex: typeof Flex, manager: Flex.Manager) {
+  let mediaId: string;
+  const custom_config = (Flex.Manager.getInstance().configuration as any)?.custom_data;
+  const protocol = custom_config?.serverless_functions_protocol ?? 'https';
+  const domain = custom_config?.serverless_functions_domain;
+  let port = custom_config?.serverless_functions_port;
+  port = port ? `:${port}` : '';
 
-//   flex.MainHeader.Content.add(
-//     <button
-//       className="button-stop-audio"
-//       key="custom-pause-audio"
-//       onClick={() => {
-//         flex.AudioPlayerManager.stop(mediaId);
-//       }}
-//     >
-//       <Icon icon="VolumeBold" />
-//     </button>,
-//     {
-//       sortOrder: 3,
-//     },
-//   );
+  if (!protocol || !domain) {
+    console.log('Serverless Functions Domain not set on config!', `${protocol}://${domain}${port}/`);
+    return;
+  }
 
-//   const slackNotification = async (reservation: any) => {
-//     const baseUrlTaskRouter = `${process.env.FLEX_APP_BASE_URL_SERVERLESS_FUNCTIONS}/utils/taskrouter_callback_handler`;
-//     const WorkerAttributes = JSON.stringify(reservation._worker.attributes);
-//     const TaskAttributes = JSON.stringify(reservation?.task?.attributes);
-//     const time = 10;
+  flex.MainHeader.Content.add(
+    <Button
+      variant="secondary_icon"
+      className="button-stop-audio"
+      key="custom-pause-audio"
+      onClick={async () => {
+        flex.AudioPlayerManager.stop(mediaId);
+      }}
+    >
+      <VolumeOnIcon decorative={false} title="Parar áudio" size="sizeIcon40" color="colorTextBrandInverse" />
+    </Button>,
+    {
+      sortOrder: 3,
+    },
+  );
 
-//     const body = {
-//       WorkerAttributes,
-//       TaskAttributes,
-//       TaskChannelUniqueName: reservation?.task?.taskChannelUniqueName,
-//       TaskQueueName: reservation?.task?.queueName,
-//     };
+  const slackNotification = async (reservation: any) => {
+    const baseUrlTaskRouter = `${protocol}://${domain}${port}/utils/taskrouter_callback_handler`;
+    const WorkerAttributes = JSON.stringify(reservation._worker.attributes);
+    const TaskAttributes = JSON.stringify(reservation?.task?.attributes);
+    const time = 10;
 
-//     const clientName = reservation?.task?.attributes?.name
-//       ? reservation?.task?.attributes?.name.replace('whatsapp:', '')
-//       : reservation?.task?.from;
+    const body = {
+      WorkerAttributes,
+      TaskAttributes,
+      TaskChannelUniqueName: reservation?.task?.taskChannelUniqueName,
+      TaskQueueName: reservation?.task?.queueName,
+    };
 
-//     const Message =
-//       JSON.stringify(`:eyes: Já se passaram ${time} minutos e você ainda está com uma tarefa para atendimento do tipo ${reservation?.task?.taskChannelUniqueName}.
+    const clientName = reservation?.task?.attributes?.name
+      ? reservation?.task?.attributes?.name.replace('whatsapp:', '')
+      : reservation?.task?.from;
 
-//       :telephone_receiver: O cliente *${clientName}* está sendo transferido para outra fila.
+    const Message =
+      JSON.stringify(`:eyes: Já se passaram ${time} minutos e você ainda está com uma tarefa para atendimento do tipo ${reservation?.task?.taskChannelUniqueName}.
 
-//       :hourglass_flowing_sand: *Fila:* ${reservation?.task?.queueName}`);
+      :telephone_receiver: O cliente *${clientName}* está sendo transferido para outra fila.
 
-//     const SupervisorMessage =
-//       JSON.stringify(`:eyes: Já se passaram ${time} minutos e o agente ${reservation._worker.attributes?.full_name} ainda está com uma tarefa para atendimento do tipo ${reservation?.task?.taskChannelUniqueName}.
+      :hourglass_flowing_sand: *Fila:* ${reservation?.task?.queueName}`);
 
-//       :telephone_receiver: O cliente *${clientName}* está sendo transferido para outra fila.
+    const SupervisorMessage =
+      JSON.stringify(`:eyes: Já se passaram ${time} minutos e o agente ${reservation._worker.attributes?.full_name} ainda está com uma tarefa para atendimento do tipo ${reservation?.task?.taskChannelUniqueName}.
 
-//       :hourglass_flowing_sand: *Fila:* ${reservation?.task?.queueName}`);
+      :telephone_receiver: O cliente *${clientName}* está sendo transferido para outra fila.
 
-//     setTimeout(() => {
-//       if (reservation.status === 'pending') {
-//         flex.Actions.invokeAction('SetActivity', { activitySid: process.env.FLEX_APP_NOT_ATTENDANCE_ACTIVITY });
+      :hourglass_flowing_sand: *Fila:* ${reservation?.task?.queueName}`);
 
-//         flex.Notifications.showNotification('changeToActivityNotAttendance');
+    setTimeout(() => {
+      if (reservation.status === 'pending') {
+        flex.Actions.invokeAction('SetActivity', { activitySid: config.getMissedAttendanceActivitySid() });
 
-//         axios.post(baseUrlTaskRouter, { ...body, EventType: 'reservation.created', Message, SupervisorMessage });
-//       }
-//     }, 60000 * 10); // 10 minutos
+        flex.Notifications.showNotification('changeToActivityNotAttendance');
 
-//     if (validateGuardian(reservation)) {
-//       const GuardianMessage =
-//         JSON.stringify(`Olá ${reservation?.task?.attributes?.clientInformation.guardian} :slightly_smiling_face:, o cliente *${clientName}* abriu uma tarefa para atendimento do tipo ${reservation?.task?.taskChannelUniqueName}.
+        axios.post(baseUrlTaskRouter, { ...body, EventType: 'reservation.created', Message, SupervisorMessage });
+      }
+    }, 60000 * 10); // 10 minutos
 
-//         :telephone_receiver: O cliente *${clientName}* está sendo atendido pelo agente ${reservation._worker.attributes?.full_name}.
+    if (validateGuardian(reservation)) {
+      const GuardianMessage =
+        JSON.stringify(`Olá ${reservation?.task?.attributes?.clientInformation.guardian} :slightly_smiling_face:, o cliente *${clientName}* abriu uma tarefa para atendimento do tipo ${reservation?.task?.taskChannelUniqueName}.
 
-//         :hourglass_flowing_sand: *Fila:* ${reservation?.task?.queueName}`);
+        :telephone_receiver: O cliente *${clientName}* está sendo atendido pelo agente ${reservation._worker.attributes?.full_name}.
 
-//       axios.post(baseUrlTaskRouter, { ...body, Message, EventType: 'reservation.message.guardian', GuardianMessage });
-//     }
-//   };
+        :hourglass_flowing_sand: *Fila:* ${reservation?.task?.queueName}`);
 
-//   manager.workerClient?.on('reservationCreated', async (reservation) => {
-//     async function playAudio() {
-//       if (reservation.task.attributes.direction === 'inbound') {
-//         mediaId = await flex.AudioPlayerManager.play({
-//           url: 'https://inchworm-snail-1427.twil.io/assets/alert_task_incomming.mp3',
-//           repeatable: true,
-//         });
-//       }
-//     }
+      axios.post(baseUrlTaskRouter, { ...body, Message, EventType: 'reservation.message.guardian', GuardianMessage });
+    }
+  };
 
-//     if (!isCanceled(reservation)) {
-//       await playAudio();
-//     }
+  manager.workerClient?.on('reservationCreated', async (reservation) => {
+    async function playAudio() {
+      if (reservation.task.attributes.direction === 'inbound') {
+        const audioURL = `${protocol}://${domain}${port}/features/sound-notifications/alert_task_incoming.mp3`;
+        mediaId = await flex.AudioPlayerManager.play({
+          url: audioURL,
+          repeatable: true,
+        });
+      }
+    }
 
-//     const reservationEvents = [
-//       'accepted',
-//       'canceled',
-//       'completed',
-//       'rejected',
-//       'rescinded',
-//       'timeout',
-//       'wrapup',
-//       'wrapping',
-//     ];
+    if (!isCanceled(reservation)) {
+      await playAudio();
+    }
 
-//     reservationEvents.forEach((eventName) => {
-//       reservation.addListener(eventName, () => {
-//         flex.AudioPlayerManager.stop(mediaId);
-//       });
-//     });
+    const reservationEvents = [
+      'accepted',
+      'canceled',
+      'completed',
+      'rejected',
+      'rescinded',
+      'timeout',
+      'wrapup',
+      'wrapping',
+    ];
 
-//     reservation.on('canceled', (res: any) => {
-//       flex.AudioPlayerManager.stop(mediaId);
+    reservationEvents.forEach((eventName) => {
+      reservation.addListener(eventName, () => {
+        flex.AudioPlayerManager.stop(mediaId);
+        console.log('parou o áudio.');
+      });
+    });
 
-//       if (res.task.attributes.direction === 'outbound' && !res.task.transfers.incoming) {
-//         flex.AgentDesktopView.Panel1.Content.add(
-//           <SaveHistoryCall
-//             task={res.task}
-//             workerInformation={workerAttributes}
-//             flex={flex}
-//             isOpen={true}
-//             key="save-history-call-hubspot"
-//           />,
-//         );
-//       }
-//     });
+    reservation.on('canceled', (_res: any) => {
+      flex.AudioPlayerManager.stop(mediaId);
+      console.log('parou o áudio (canceled).');
+    });
 
-//     const showNotification = () => {
-//       // create a new notification
-//       const notification = new Notification('Cliente aguarda para atendimento', {
-//         body: '',
-//       });
+    const showNotification = () => {
+      // create a new notification
+      const notification = new Notification('Cliente aguardando atendimento', {
+        body: '',
+      });
 
-//       // close the notification after 10 seconds
-//       setTimeout(() => {
-//         notification.close();
-//       }, 10 * 1000);
-//     };
+      // close the notification after 10 seconds
+      setTimeout(() => {
+        notification.close();
+      }, 10 * 1000);
+    };
 
-//     if (reservation?.task?.attributes?.direction !== 'outbound') {
-//       await slackNotification(reservation);
+    if (reservation?.task?.attributes?.direction !== 'outbound') {
+      // await slackNotification(reservation);
 
-//       showNotification();
-//     }
+      showNotification();
+    }
 
-//     const workerAttributes = {
-//       workerName: (manager.workerClient?.attributes as any).full_name,
-//       workerEmail: (manager.workerClient?.attributes as any).email,
-//     };
+    if (!reservation.task || !reservation.task.attributes || !reservation.task.attributes.clientInformation) return;
 
-//     if (reservation.task.taskChannelUniqueName === 'chat' || reservation.task?.attributes?.channelType === 'whatsapp') {
-//       flex.Actions.invokeAction('AcceptTask', { sid: reservation.sid });
+    if (reservation.task.attributes.clientNumber) return;
 
-//       if (reservation && reservation.status === PENDING_STATUS) {
-//         setInterval(async () => {
-//           if (reservation.status === PENDING_STATUS) {
-//             flex.Actions.invokeAction('AcceptTask', { sid: reservation.sid });
-//           }
-//         }, 10000);
-//       }
-//     }
+    const clientInfo = reservation.task.attributes.clientInformation;
 
-//     if (!reservation.task || !reservation.task.attributes || !reservation.task.attributes.clientInformation) return;
+    const clientNumber = reservation?.task?.attributes?.name
+      ? reservation?.task?.attributes?.name.replace('whatsapp:', '')
+      : reservation?.task?.attributes?.from;
 
-//     if (reservation.task.attributes.clientNumber) return;
+    let hubspotNameAndNumber = clientNumber;
 
-//     const clientInfo = reservation.task.attributes.clientInformation;
+    if (clientInfo.firstname) {
+      hubspotNameAndNumber = `${clientInfo.firstname} ${clientInfo.lastname} (${clientNumber})`;
+    }
+    reservation.task.setAttributes({
+      ...reservation.task.attributes,
+      name: hubspotNameAndNumber,
+      clientNumber: `whatsapp:${clientNumber}`,
+    });
+  });
 
-//     const clientNumber = reservation?.task?.attributes?.name
-//       ? reservation?.task?.attributes?.name.replace('whatsapp:', '')
-//       : reservation?.task?.attributes?.from;
+  /* notification for already opened conversations */
+  manager.conversationsClient.on('messageAdded', async (payload) => {
+    const audioURL = `${protocol}://${domain}${port}/features/sound-notifications/message_incoming.mp3`;
 
-//     let hubspotNameAndNumber = clientNumber;
+    if (payload?.author?.includes('whatsapp')) {
+      await flex.AudioPlayerManager.play({
+        url: audioURL,
+        repeatable: false,
+      });
+    }
 
-//     if (clientInfo.firstname) {
-//       hubspotNameAndNumber = `${clientInfo.firstname} ${clientInfo.lastname} (${clientNumber})`;
-//     }
-//     reservation.task.setAttributes({
-//       ...reservation.task.attributes,
-//       name: hubspotNameAndNumber,
-//       clientNumber: `whatsapp:${clientNumber}`,
-//     });
-//   });
+    const loggedWorkerName = manager.workerClient?.name.replace(/(_2E)/g, '.').replace('_40', '@');
 
-//   const voiceClientEvents = ['cancel', 'disconnect', 'reject'];
+    const participants = await payload.conversation.getParticipants();
+    const member = participants.find((p) => p.type !== 'guest');
+    const memberIdentity = member?.identity;
 
-//   voiceClientEvents.forEach((eventName) => {
-//     manager.voiceClient.on(eventName, async (_payload) => {
-//       flex.AudioPlayerManager.stop(mediaId);
-//     });
-//   });
-// };
+    if (memberIdentity === manager.workerClient?.name) {
+      const authorFormatted = payload.author?.replace(/(_2E)/g, '.').replace('_40', '@');
+      const onLoadSelectedTask = window.location.pathname.split('/').find((item) => item.includes('WR'));
+
+      if (authorFormatted === loggedWorkerName) return;
+      if (onLoadSelectedTask) return;
+
+      flex.Notifications.showNotification('notificationOpenConversation');
+    }
+  });
+
+  const voiceClientEvents = ['cancel', 'disconnect', 'reject'];
+
+  voiceClientEvents.forEach((eventName) => {
+    manager.voiceClient.on(eventName, async (_payload) => {
+      flex.AudioPlayerManager.stop(mediaId);
+    });
+  });
+};

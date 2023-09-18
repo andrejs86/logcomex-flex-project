@@ -51,7 +51,7 @@ export const cssOverrideHook = (flex: typeof Flex, manager: Flex.Manager) => {
     // top header
     MainHeader: {
       Container: {
-        background: cBlue,
+        background: '#583cb3',
         color: cSolitude,
       },
     },
@@ -87,14 +87,6 @@ export const cssOverrideHook = (flex: typeof Flex, manager: Flex.Manager) => {
         Icon: {
           background: cBlue,
           color: cSolitude,
-        },
-      },
-    },
-
-    TaskList: {
-      Item: {
-        Icon: {
-          backgroundColor: cBlueLight,
         },
       },
     },

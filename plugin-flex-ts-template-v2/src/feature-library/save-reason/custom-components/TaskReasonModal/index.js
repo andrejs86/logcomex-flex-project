@@ -111,7 +111,7 @@ const TaskReasonModal = (props) => {
   const [newEmail, setNewEmail] = useState('');
   const [alertContactNotFound, setAlertContactNotFound] = useState();
   const [deals, setDeals] = useState();
-  const [wrapupTimeout, setWrapupTimeout] = useState(120);
+  const [wrapupTimeout, setWrapupTimeout] = useState(config.getWrapupTimeout());
   const reasons = config.getAllReasons();
   let timeout;
 
@@ -227,7 +227,8 @@ const TaskReasonModal = (props) => {
         conversations,
         taskDetails: `${currentTopic} - ${selectedOption}\n\n${taskDetails}`,
         call_type: selectedType,
-        call_outcome: selectedOutcome,
+        call_outcome:
+          task.attributes.direction === 'inbound' ? 'a4c4c377-d246-4b32-a13b-75a56a4cd0ff' : selectedOutcome, // se é inbound, marcar como conectado
         newEmail,
       });
 
@@ -320,28 +321,29 @@ const TaskReasonModal = (props) => {
               {/* Outcomes */}
               {task.channelType === 'voice' && (
                 <>
-                  <Box marginBottom="space80">
-                    <Label required htmlFor="save-reason-select-outcome">
-                      Outcome:
-                    </Label>
-                    <Select
-                      required
-                      id="save-reason-select-outcome"
-                      onChange={(e) => setSelectedOutcome(e.target.value)}
-                    >
-                      <Option value="Selecione um outcome..." hidden>
-                        Selecione um Outcome...
-                      </Option>
-                      {outcomeOptions.map((reason, i) => {
-                        return (
-                          <Option value={reason.id} className="reasonTopic" key={`reasonTopic_${i}`}>
-                            {reason.label}
-                          </Option>
-                        );
-                      })}
-                    </Select>
-                  </Box>
-
+                  {task.attributes.direction === 'outbound' && (
+                    <Box marginBottom="space80">
+                      <Label required htmlFor="save-reason-select-outcome">
+                        Outcome:
+                      </Label>
+                      <Select
+                        required
+                        id="save-reason-select-outcome"
+                        onChange={(e) => setSelectedOutcome(e.target.value)}
+                      >
+                        <Option value="Selecione um outcome..." hidden>
+                          Selecione um Outcome...
+                        </Option>
+                        {outcomeOptions.map((reason, i) => {
+                          return (
+                            <Option value={reason.id} className="reasonTopic" key={`reasonTopic_${i}`}>
+                              {reason.label}
+                            </Option>
+                          );
+                        })}
+                      </Select>
+                    </Box>
+                  )}
                   <Box marginBottom="space80">
                     <Label required htmlFor="save-reason-select-type">
                       Tipo de Call:

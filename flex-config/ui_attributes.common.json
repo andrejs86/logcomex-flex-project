@@ -129,25 +129,16 @@
         "enabled": false
       },
       "agent_automation": {
-        "enabled": false,
+        "enabled": true,
         "configuration": [
-          {
-            "channel": "voice",
-            "auto_accept": true,
-            "auto_select": true,
-            "auto_wrapup": true,
-            "required_attributes": [],
-            "wrapup_time": 30000,
-            "default_outcome": "Automatically completed"
-          },
           {
             "channel": "chat",
             "auto_accept": true,
             "auto_select": true,
-            "auto_wrapup": true,
+            "auto_wrapup": false,
             "required_attributes": [],
             "wrapup_time": 30000,
-            "default_outcome": "Automatically completed"
+            "default_outcome": "Finalizada Automaticamente"
           }
         ]
       },
@@ -246,8 +237,6 @@
       },
       "custom_queue_metrics": {
         "enabled": true,
-        "accountSid": "",
-        "authToken": "",
         "workspaceSid": ""
       },
       "hubspot_integration": {
@@ -260,10 +249,35 @@
         "enabled": true
       },
       "save_reason": {
-        "enabled": true
+        "enabled": true,
+        "wrapupTimeout": 3600,
+        "reasons": [
+          {
+            "topic": "Cliente Logcomex",
+            "options": [
+              "Problemas",
+              "Dúvidas",
+              "Solicitação de Serviços",
+              "Solicitação Geral"
+            ]
+          },
+          {
+            "topic": "Não cliente Logcomex",
+            "options": ["Orçamento", "Dúvidas", "Apresentação"]
+          }
+        ]
       },
       "logcomex_theme": {
         "enabled": true
+      },
+      "post_task_survey": {
+        "voiceSurveyEnabled": false,
+        "whatsappSurveyEnabled": true,
+        "surveyWorkflowSid": "WW1e5da4dfd06871da5b28321383908a39",
+        "whatsappSurveyContentSid": "HX7229f9dab7072180b93c4f277b958406",
+        "whatsappSurveyMessage": "",
+        "whatsappNumber": "+554140426460",
+        "whatsappInboundStudioFlow": "FWfa53eced76c91bab4962d0eb77e89670"
       }
     }
   }

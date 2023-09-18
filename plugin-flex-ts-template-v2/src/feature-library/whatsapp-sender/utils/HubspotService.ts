@@ -19,7 +19,6 @@ class HubspotService extends ApiService {
         body: this.buildBody(encodedParams),
       })
         .then((response) => {
-          console.log(response);
           resolve(response);
         })
         .catch((error) => {
