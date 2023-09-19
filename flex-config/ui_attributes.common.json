@@ -43,28 +43,8 @@
           "team": false,
           "agent_skills": true
         },
-        "department_options": [
-          "General Management",
-          "Marketing",
-          "Operations",
-          "Finance",
-          "Sales",
-          "Human Resources",
-          "Purchasing",
-          "Customer Service",
-          "Recruiting"
-        ],
-        "team_options": [
-          "Blue Team",
-          "Red Team",
-          "Gold Team",
-          "VIP Team",
-          "Orange Team",
-          "Yellow Team",
-          "Green Team",
-          "Purple Team",
-          "Gray Team"
-        ]
+        "department_options": ["Marketing", "Commercial", "Support"],
+        "team_options": ["Blue Team", "Red Team"]
       },
       "supervisor_capacity": {
         "enabled": true
@@ -85,7 +65,7 @@
             "auto_wrapup": false,
             "required_attributes": [],
             "wrapup_time": 30000,
-            "default_outcome": "Finalizada Automaticamente"
+            "default_outcome": "Finalizada Automaticamente (timeout)"
           }
         ]
       },
@@ -94,7 +74,7 @@
         "outcome": "Finalizada pelo supervisor"
       },
       "canned_responses": {
-        "enabled": true,
+        "enabled": false,
         "location": "MessageInputActions"
       },
       "keyboard_shortcuts": {
@@ -154,7 +134,7 @@
         "enabled": true,
         "timeoutActivities": {
           "Break": {
-            "time": 60
+            "time": 3600
           }
         }
       },
@@ -162,17 +142,17 @@
         "enabled": true
       },
       "sound_notifications": {
-        "enabled": true
+        "enabled": true,
+        "missedAttendanceActivitySid": "WAf988014f0ec41ab10b076441f667be29"
       },
       "custom_queue_metrics": {
         "enabled": true,
-        "workspaceSid": ""
+        "workspaceSid": "WSc8281b9baf2eb8632a65c9518d29ab70"
       },
       "hubspot_integration": {
         "enabled": true,
-        "datadogLogsBaseURL": "",
-        "internationalQueueSid": "",
-        "everyoneQueueSid": ""
+        "internationalQueueSid": "WQadac584e22c20527c47a7c41d1d629c2",
+        "everyoneQueueSid": "WQ4b0068acf853595708999f359d7b07a3"
       },
       "whatsapp_sender": {
         "enabled": true
@@ -197,7 +177,10 @@
         ]
       },
       "logcomex_theme": {
-        "enabled": true
+        "enabled": true,
+        "hubspotInstanceId": "23315776",
+        "logoUrl": "https://drab-newt-3733.twil.io/assets/LOGCOMEX%20-%20novo_logo_H_TM_negativo_fundo_roxo.png",
+        "whatsappNotificationUrl": "https://drab-newt-3733.twil.io/assets/meet-message.mp3"
       },
       "post_task_survey": {
         "voiceSurveyEnabled": false,

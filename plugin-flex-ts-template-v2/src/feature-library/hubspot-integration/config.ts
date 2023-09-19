@@ -5,7 +5,6 @@ const {
   enabled = false,
   internationalQueueSid = '',
   everyoneQueueSid = '',
-  datadogLogsBaseURL = '',
 } = (getFeatureFlags()?.features?.hubspot_integration as HubspotIntegrationConfig) || {};
 
 export const isFeatureEnabled = () => {
@@ -18,8 +17,4 @@ export const getInternationalQueueSid = () => {
 
 export const getEveryoneQueueSid = () => {
   return everyoneQueueSid;
-};
-
-export const getDatadogLogsBaseURL = () => {
-  return datadogLogsBaseURL;
 };
