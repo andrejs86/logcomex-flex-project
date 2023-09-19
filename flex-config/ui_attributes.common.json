@@ -28,9 +28,6 @@
         "agent_assistance": true,
         "supervisor_alert_toggle": true
       },
-      "device_manager": {
-        "enabled": true
-      },
       "teams_view_filters": {
         "enabled": true,
         "log_filters": false,
