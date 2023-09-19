@@ -50,11 +50,6 @@ jobs:
           echo " - Environment: ${{ env.ENVIRONMENT }}"  >> $GITHUB_STEP_SUMMARY
           npm install
           npm run populate-missing-placeholders $ENVIRONMENT
-      - name: install npm and build video-app-assets
-        working-directory: web-app-examples/video-app-quickstart
-        run: |
-          npm install
-          npm run build
       - name: deploy serverless
         working-directory: serverless-functions
         run: |
