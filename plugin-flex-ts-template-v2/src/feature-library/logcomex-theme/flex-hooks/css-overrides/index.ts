@@ -8,18 +8,9 @@ export const cssOverrideHook = (flex: typeof Flex, manager: Flex.Manager) => {
   const lightTheme = true;
   const cSolitude = '#eaebf0';
   const cBlue = '#1d0336';
-  const cBlueLight = '#1d0336';
-
   const configuration = {
     theme: {
       isLight: lightTheme,
-      tokens: {
-        // tabSelectedColor: cBlue,
-        // focusColor: cBlue,
-        // completeTaskColor: cBlue,
-        // defaultButtonColor: cBlue,
-        // flexBlueColor: cBlue,
-      },
     },
   };
   // Finally, we pass the configuration to the Flex manager to make the changes go live
