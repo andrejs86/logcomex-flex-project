@@ -29,7 +29,7 @@ exports.handler = async (context, event, callback) => {
   }
 
   try {
-    const twilioNumber = context.TWILIO_WHATSAPP_NUMBER;
+    const twilioNumber = event.WhatsappNumber;
     const phoneRegex = /^(55)?\(?[1-9]{2}\)?\s?\d{4,5}(\-|\s)?\d{4}$/gm;
 
     const fromNumberFormatted = twilioNumber.replace(/\D/gi, '');

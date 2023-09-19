@@ -3,8 +3,8 @@ const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN
 
 const OBJECTS_URL = `/crm/v3/objects`;
 const ASSOCIATIONS_URL = `/crm/v3/associations`;
-const CONVERSAS_URL = `${OBJECTS_URL}/${process.env.CUSTOM_OBJECT_CONVERSAS}`;
-const ASSOCIATIONS_URL_CONVERSAS = `${ASSOCIATIONS_URL}/${process.env.CUSTOM_OBJECT_CONVERSAS}`;
+let CONVERSAS_URL = '';
+let ASSOCIATIONS_URL_CONVERSAS = '';
 
 // get message history of conversation between client, bot and Agent
 
@@ -514,10 +514,13 @@ exports.handler = async (context, event, callback) => {
   response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
   response.appendHeader('Content-Type', 'application/json');
 
+  CONVERSAS_URL = `${OBJECTS_URL}/${event.CustomObjectConversas}`;
+  ASSOCIATIONS_URL_CONVERSAS = `${ASSOCIATIONS_URL}/${event.CustomObjectConversas}`;
+
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
     headers: {
-      Authorization: `Bearer ${context.HUBSPOT_API_TOKEN}`,
+      Authorization: `Bearer ${event.HubspotApiToken}`,
     },
   });
 

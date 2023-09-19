@@ -3,6 +3,8 @@ import SaveReasonConfig from './types/ServiceConfiguration';
 
 const {
   enabled = false,
+  hubspotApiToken = '',
+  customObjectConversas = '',
   wrapupTimeout = 120,
   reasons = [
     {
@@ -30,4 +32,12 @@ export const getAllReasons = () => {
 
 export const getWrapupTimeout = () => {
   return wrapupTimeout;
+};
+
+export const getHubspotApiToken = () => {
+  return hubspotApiToken;
+};
+
+export const getCustomObjectConversas = () => {
+  return customObjectConversas;
 };

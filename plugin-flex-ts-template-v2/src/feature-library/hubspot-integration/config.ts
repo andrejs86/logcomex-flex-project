@@ -3,6 +3,7 @@ import HubspotIntegrationConfig from './types/ServiceConfiguration';
 
 const {
   enabled = false,
+  hubspotApiToken = '',
   internationalQueueSid = '',
   everyoneQueueSid = '',
 } = (getFeatureFlags()?.features?.hubspot_integration as HubspotIntegrationConfig) || {};
@@ -17,4 +18,8 @@ export const getInternationalQueueSid = () => {
 
 export const getEveryoneQueueSid = () => {
   return everyoneQueueSid;
+};
+
+export const getHubspotApiToken = () => {
+  return hubspotApiToken;
 };

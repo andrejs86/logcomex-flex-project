@@ -1,11 +1,13 @@
 import ApiService from '../../../utils/serverless/ApiService';
 import { EncodedParams } from '../../../types/serverless';
+import * as config from '../config';
 
 class HubspotService extends ApiService {
   searchClient = async (searchValue: string): Promise<any> => {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        HubspotApiToken: config.getHubspotApiToken(),
       };
 
       const url = `${this.serverlessProtocol}://${this.serverlessDomain}/features/hubspot-integration/flex/search-client-modal?value=${searchValue}`;

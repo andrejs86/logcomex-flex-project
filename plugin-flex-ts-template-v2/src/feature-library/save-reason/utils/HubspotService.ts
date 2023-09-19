@@ -2,12 +2,14 @@ import axios from 'axios';
 
 import ApiService from '../../../utils/serverless/ApiService';
 import { EncodedParams } from '../../../types/serverless';
+import * as config from '../config';
 
 class HubspotService extends ApiService {
   SearchClient = async (email: string): Promise<any> => {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        HubspotApiToken: config.getHubspotApiToken(),
         clientEmail: email,
         typeSearch: 'email',
       };
@@ -32,6 +34,7 @@ class HubspotService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        HubspotApiToken: config.getHubspotApiToken(),
         taskAttributes: JSON.stringify(taskAttributes),
       };
 
@@ -55,6 +58,7 @@ class HubspotService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        HubspotApiToken: config.getHubspotApiToken(),
         hs_object_id,
         associatedcompanyid,
       };
@@ -79,6 +83,7 @@ class HubspotService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        HubspotApiToken: config.getHubspotApiToken(),
         typeSearch: 'email',
         clientEmail,
       };
@@ -103,6 +108,7 @@ class HubspotService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        HubspotApiToken: config.getHubspotApiToken(),
       };
 
       const url = `${this.serverlessProtocol}://${this.serverlessDomain}/features/hubspot-integration/flex/get-call-outcomes-and-types-from-sync`;
@@ -134,6 +140,8 @@ class HubspotService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        HubspotApiToken: config.getHubspotApiToken(),
+        CustomObjectConversas: config.getCustomObjectConversas(),
         taskAttributes: JSON.stringify(taskAttributes),
         workerAttributes: JSON.stringify(workerAttributes),
         taskCreatedDate,

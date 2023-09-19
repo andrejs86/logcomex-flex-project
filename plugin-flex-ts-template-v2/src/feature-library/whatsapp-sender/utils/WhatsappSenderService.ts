@@ -1,5 +1,6 @@
 import ApiService from '../../../utils/serverless/ApiService';
 import { EncodedParams } from '../../../types/serverless';
+import * as config from '../config';
 
 class WhatsappSenderService extends ApiService {
   getTemplates = async (): Promise<any> => {
@@ -29,6 +30,7 @@ class WhatsappSenderService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        WhatsappNumber: config.getWhatsappNumber(),
         clientNumber: message.clientNumber,
         templateContent: message.templateContent,
       };
