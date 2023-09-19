@@ -6,16 +6,6 @@
   },
   "custom_data": {
     "features": {
-      "activity_skill_filter": {
-        "enabled": false,
-        "filter_teams_view": false
-      },
-      "callback_and_voicemail": {
-        "enabled": false,
-        "allow_requeue": true,
-        "max_attempts": 3,
-        "auto_select_task": true
-      },
       "caller_id": {
         "enabled": true
       },
@@ -24,23 +14,11 @@
         "cold_transfer": true,
         "multi_participant": true
       },
-      "chat_to_video_escalation": {
-        "enabled": false
-      },
       "conference": {
         "enabled": true,
         "hold_workaround": false
       },
-      "enhanced_crm_container": {
-        "enabled": false,
-        "url": "https://www.bing.com/search?q={{task.from}}",
-        "should_display_url_when_no_tasks": false,
-        "display_url_when_no_tasks": "https://www.bing.com"
-      },
       "internal_call": {
-        "enabled": true
-      },
-      "scrollable_activities": {
         "enabled": true
       },
       "supervisor_barge_coach": {
@@ -50,33 +28,8 @@
         "agent_assistance": true,
         "supervisor_alert_toggle": true
       },
-      "omni_channel_capacity_management": {
-        "enabled": true,
-        "channel": "chat",
-        "default_max_capacity": 2
-      },
       "device_manager": {
         "enabled": true
-      },
-      "dual_channel_recording": {
-        "enabled": false,
-        "channel": "worker"
-      },
-      "pause_recording": {
-        "enabled": true,
-        "include_silence": false,
-        "indicator_banner": false,
-        "indicator_permanent": true
-      },
-      "activity_reservation_handler": {
-        "enabled": false,
-        "system_activity_names": {
-          "available": "Available",
-          "onATask": "On a Task",
-          "onATaskNoAcd": "On a Task, No ACD",
-          "wrapup": "Wrap Up",
-          "wrapupNoAcd": "Wrap Up, No ACD"
-        }
       },
       "teams_view_filters": {
         "enabled": true,
@@ -119,14 +72,8 @@
       "schedule_manager": {
         "enabled": true
       },
-      "multi_call": {
-        "enabled": false
-      },
       "hang_up_by": {
         "enabled": true
-      },
-      "chat_transfer": {
-        "enabled": false
       },
       "agent_automation": {
         "enabled": true,
@@ -151,7 +98,7 @@
         "location": "MessageInputActions"
       },
       "keyboard_shortcuts": {
-        "enabled": true
+        "enabled": false
       },
       "custom_hold_music": {
         "enabled": false,
@@ -181,24 +128,6 @@
           ]
         }
       },
-      "dispositions": {
-        "enabled": false,
-        "enable_notes": true,
-        "require_disposition": false,
-        "global_dispositions": [
-          "Resolved",
-          "Not Resolved",
-          "Follow-up Required",
-          "Escalation",
-          "Wrong Department"
-        ],
-        "per_queue": {
-          "exampleQueueSid": {
-            "require_disposition": true,
-            "dispositions": ["Promotional Sale", "Renewal"]
-          }
-        }
-      },
       "emoji_picker": {
         "enabled": true
       },
@@ -214,7 +143,7 @@
         "show_menu": true
       },
       "park_interaction": {
-        "enabled": true
+        "enabled": false
       },
       "alert_tma": {
         "enabled": true,
