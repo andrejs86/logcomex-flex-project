@@ -1,14 +1,11 @@
 import ApiService from '../../../utils/serverless/ApiService';
 import { EncodedParams } from '../../../types/serverless';
 
-import * as config from '../config';
-
 class HubspotService extends ApiService {
   UpdateInfo = async (data: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
-        HubspotApiToken: config.getHubspotApiToken(),
         hubspot_id: data.hubspot_id,
         newNumber: data.newNumber,
         messagePropertyValue: data.messagePropertyValue,
@@ -25,7 +22,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error searching client\r\n`, error);
+          console.error(`Error updating info\r\n`, error);
           reject(error);
         });
     });

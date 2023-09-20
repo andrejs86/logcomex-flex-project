@@ -52,7 +52,7 @@
 
 exports.handler = async function refreshStats(context, event, callback) {
   const client = context.getTwilioClient();
-  const syncService = client.sync.services(context.TWILIO_FLEX_SYNC_SID);
+  const syncService = client.sync.v1.services(context.TWILIO_FLEX_SYNC_SID);
   const response = new Twilio.Response();
 
   const QUEUE_STATS_MAP_NAME = process.env.QUEUE_STATS_MAP_NAME;

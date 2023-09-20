@@ -14,7 +14,7 @@ exports.handler = async (context, event, callback) => {
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
     headers: {
-      Authorization: `Bearer ${event.HubspotApiToken}`,
+      Authorization: `Bearer ${context.HUBSPOT_API_KEY}`,
     },
   });
 
@@ -29,13 +29,14 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: `Client ${typeSearch || 'email'} is undefined`,
     });
-    return callback(null, response);
+    console.error('typeSearch not specified');
+    return callback('typeSearch not specified', response);
   }
 
   if (typeSearch.includes('phone') && !regexNumber.test(value.replace(/[A-Za-z\:\+]/g, ''))) {
     response.setBody({ success: false, message: 'Value type is invalid' });
-
-    return callback(null, response);
+    console.error('value not specified');
+    return callback('value not specified', response);
   }
 
   try {
@@ -193,6 +194,6 @@ exports.handler = async (context, event, callback) => {
   } catch (error) {
     console.log(error);
     response.setBody({ success: false, error });
-    return callback(response, null);
+    return callback(error, response);
   }
 };

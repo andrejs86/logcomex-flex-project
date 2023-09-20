@@ -205,22 +205,6 @@ exports.installNPMPlugin = function installNPMPlugin() {
   }
 };
 
-exports.installNPMVideoAppQuickstart = function installNPMVideoAppQuickstart() {
-  console.log(
-    "Installing npm dependencies for web-app-examples/video-app-quickstart..."
-  );
-  shell.cd("./web-app-examples/video-app-quickstart");
-  shell.exec("npm install", { silent: true });
-  shell.cd("../..");
-};
-
-exports.buildVideoAppQuickstart = function buildNPMVideoAppQuickstart() {
-  console.log("building assets for video app quickstart");
-  shell.cd("./web-app-examples/video-app-quickstart");
-  shell.exec("npm run build", { silent: true });
-  shell.cd("../..");
-};
-
 exports.generateServerlessFunctionsEnv =
   function generateServerlessFunctionsEnv(
     context,
@@ -232,6 +216,7 @@ exports.generateServerlessFunctionsEnv =
       var {
         account_sid,
         auth_token,
+        hubspot_api_token,
         api_key,
         api_secret,
         taskrouter_workspace_sid,
@@ -247,6 +232,8 @@ exports.generateServerlessFunctionsEnv =
         api_key = process.env.TWILIO_API_KEY;
       if (process.env.TWILIO_API_SECRET && !api_secret)
         api_secret = process.env.TWILIO_API_SECRET;
+      if (process.env.HUBSPOT_API_TOKEN && !hubspot_api_token)
+        hubspot_api_token = process.env.HUBSPOT_API_TOKEN;
 
       if (!shell.test("-e", serverlessEnv)) {
         shell.cp(serverlessEnvExample, serverlessEnv);
@@ -265,6 +252,14 @@ exports.generateServerlessFunctionsEnv =
             "-i",
             /<YOUR_TWILIO_AUTH_TOKEN>/g,
             `${auth_token}`,
+            serverlessEnv
+          );
+        }
+        if (hubspot_api_token) {
+          shell.sed(
+            "-i",
+            /<YOUR_HUBSPOT_API_TOKEN>/g,
+            `${hubspot_api_token}`,
             serverlessEnv
           );
         }

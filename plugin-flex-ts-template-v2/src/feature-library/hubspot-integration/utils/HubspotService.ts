@@ -7,7 +7,6 @@ class HubspotService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
-        HubspotApiToken: config.getHubspotApiToken(),
       };
 
       const url = `${this.serverlessProtocol}://${this.serverlessDomain}/features/hubspot-integration/flex/search-client-modal?value=${searchValue}`;

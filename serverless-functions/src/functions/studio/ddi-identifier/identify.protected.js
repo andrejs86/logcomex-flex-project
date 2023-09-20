@@ -1,4 +1,4 @@
-const awsomePhone = require('awesome-phonenumber');
+const awesomePhone = require('awesome-phonenumber');
 
 exports.handler = async (context, event, callback) => {
   const response = new Twilio.Response();
@@ -10,25 +10,35 @@ exports.handler = async (context, event, callback) => {
   // Retornar 'AR', 'BR' ou 'US' e usar esse retorno para definir o caminho no fluxo
   const { clientNumber, idioma } = event;
 
-  if (idioma && idioma !== 'unset') {
+  try {
+    if (idioma && idioma !== 'unset') {
+      response.setBody({
+        regionCode: `${idioma}`,
+      });
+
+      return callback(null, response);
+    }
+
+    let parsedNumber;
+    const hasWppWord = clientNumber.includes('whatsapp');
+
+    if (hasWppWord) parsedNumber = clientNumber.replace('whatsapp:', '');
+
+    const phoneNumber = awesomePhone.parsePhoneNumber(hasWppWord ? parsedNumber : clientNumber);
+    const regionCode = phoneNumber.regionCode;
+
+    console.log('detected region code=', regionCode);
+
     response.setBody({
-      regionCode: `${idioma}`,
+      regionCode: `${regionCode}`,
     });
 
     return callback(null, response);
+  } catch (error) {
+    console.error(error);
+    response.setBody({
+      regionCode: 'BR', // retorna BR como padrão
+    });
+    return callback(error, response);
   }
-
-  let parsedNumber;
-  const hasWppWord = clientNumber.includes('whatsapp');
-
-  if (hasWppWord) parsedNumber = clientNumber.replace('whatsapp:', '');
-
-  const phoneNumber = awsomePhone.parsePhoneNumber(hasWppWord ? parsedNumber : clientNumber);
-  const regionCode = phoneNumber.getRegionCode();
-
-  response.setBody({
-    regionCode: `${regionCode}`,
-  });
-
-  return callback(null, response);
 };

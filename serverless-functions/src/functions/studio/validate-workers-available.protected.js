@@ -1,6 +1,6 @@
 async function getWorkerStatus(email, client) {
   const workers = await client.taskrouter
-    .workspaces(process.env.TWILIO_WORKSPACE_SID)
+    .workspaces(process.env.TWILIO_FLEX_WORKSPACE_SID)
     .workers.list({
       targetWorkersExpression: `email == '${email}'`,
     })

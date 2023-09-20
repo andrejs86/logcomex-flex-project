@@ -28,7 +28,7 @@ exports.addTaskToChannel = async (parameters) => {
 
   try {
     const client = context.getTwilioClient();
-    const channel = await client.chat.services(context.TWILIO_FLEX_CHAT_SERVICE_SID).channels(channelSid).fetch();
+    const channel = await client.chat.v2.services(context.TWILIO_FLEX_CHAT_SERVICE_SID).channels(channelSid).fetch();
 
     if (!channel) return { success: false, message: 'channel not found' };
 
@@ -40,7 +40,7 @@ exports.addTaskToChannel = async (parameters) => {
       associatedTasks,
     };
 
-    const updatedChannel = await client.chat
+    const updatedChannel = await client.chat.v2
       .services(context.TWILIO_FLEX_CHAT_SERVICE_SID)
       .channels(channelSid)
       .update({ attributes: JSON.stringify(newAttributes) });
@@ -76,7 +76,7 @@ exports.setTaskToCompleteOnChannel = async (parameters) => {
 
   try {
     const client = context.getTwilioClient();
-    const channel = await client.chat.services(context.TWILIO_FLEX_CHAT_SERVICE_SID).channels(channelSid).fetch();
+    const channel = await client.chat.v2.services(context.TWILIO_FLEX_CHAT_SERVICE_SID).channels(channelSid).fetch();
 
     if (!channel) return { success: false, message: 'channel not found' };
 
@@ -88,7 +88,7 @@ exports.setTaskToCompleteOnChannel = async (parameters) => {
       associatedTasks,
     };
 
-    const updatedChannel = await client.chat
+    const updatedChannel = await client.chat.v2
       .services(context.TWILIO_FLEX_CHAT_SERVICE_SID)
       .channels(channelSid)
       .update({ attributes: JSON.stringify(newAttributes) });

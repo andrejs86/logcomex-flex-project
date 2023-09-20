@@ -28,7 +28,7 @@ exports.handler = async (context, event, callback) => {
       return callback(null, response);
     }
 
-    const task = await client.taskrouter.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
+    const task = await client.taskrouter.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
 
     let conv = {};
     const originalAttributes = JSON.parse(task.attributes);
@@ -46,14 +46,14 @@ exports.handler = async (context, event, callback) => {
       conversations: conv,
     };
 
-    await client.taskrouter
+    await client.taskrouter.v1
       .workspaces(TWILIO_FLEX_WORKSPACE_SID)
       .tasks(task.sid)
       .update({
         attributes: JSON.stringify(newAttributes),
       });
 
-    await client.taskrouter.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(task.sid).update({
+    await client.taskrouter.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(task.sid).update({
       assignmentStatus: 'canceled',
       reason: 'CSAT saved',
     });

@@ -32,7 +32,7 @@ exports.handler = prepareStudioFunction(requiredParameters, async (context, even
     console.log('Client identity for Sync : ', client_identity);
 
     // Give read-only rights to the SYNC Document to this identity so the UI can subscribe to live updates
-    await client.sync
+    await client.sync.v1
       .services(context.TWILIO_FLEX_SYNC_SID)
       .documents(code)
       .documentPermissions(client_identity)

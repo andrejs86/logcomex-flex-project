@@ -14,7 +14,7 @@ exports.handler = async (context, event, callback) => {
   const { taskSid } = event;
 
   try {
-    const task = await client.taskrouter.workspaces(context.TWILIO_WORKSPACE_SID).tasks(taskSid).fetch();
+    const task = await client.taskrouter.v1.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
 
     let status;
 
@@ -28,8 +28,8 @@ exports.handler = async (context, event, callback) => {
         break;
     }
 
-    await client.taskrouter
-      .workspaces(context.TWILIO_WORKSPACE_SID)
+    await client.taskrouter.v1
+      .workspaces(context.TWILIO_FLEX_WORKSPACE_SID)
       .tasks(taskSid)
       .update({ assignmentStatus: status, reason: 'task transferred' });
 

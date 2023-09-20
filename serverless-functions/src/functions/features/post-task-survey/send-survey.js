@@ -25,11 +25,7 @@ exports.handler = async (context, event, callback) => {
     console.log('Sending Post Task Survey (chat)...', taskSid, conversationSid);
 
     const task = await client.taskrouter.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
-    console.log('task retrieved', task);
-
     const taskAttributes = JSON.parse(task.attributes);
-    console.log('task attributes', taskAttributes);
-
     const outboundMessageParams = {
       To: taskAttributes.from,
       From: whatsappNumber,

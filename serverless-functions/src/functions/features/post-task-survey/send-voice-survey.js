@@ -8,8 +8,8 @@ exports.handler = async (context, event, callback) => {
   const responseHelper = new TwilioHelper();
 
   try {
-    const task = await client.taskrouter.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
-    const reservations = await client.taskrouter
+    const task = await client.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
+    const reservations = await client.taskrouter.v1
       .workspaces(TWILIO_FLEX_WORKSPACE_SID)
       .tasks(taskSid)
       .reservations.list();
@@ -46,7 +46,7 @@ exports.handler = async (context, event, callback) => {
       agents,
     };
 
-    const taskSurvey = await client.taskrouter.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks.create({
+    const taskSurvey = await client.taskrouter.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks.create({
       attributes: JSON.stringify(newAttributes),
       workflowSid: surveyWorkflowSid,
       taskChannel: 'survey',

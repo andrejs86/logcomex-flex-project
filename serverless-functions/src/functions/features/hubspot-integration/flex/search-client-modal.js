@@ -13,7 +13,7 @@ exports.handler = async (context, event, callback) => {
 
   const { value } = event;
 
-  if (event.HubspotApiToken) {
+  if (context.HUBSPOT_API_KEY) {
     console.log('Hubspot API Token is correctly set.');
   } else {
     console.log('Hubspot API Token is not set. Throwing...');
@@ -23,7 +23,7 @@ exports.handler = async (context, event, callback) => {
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
     headers: {
-      Authorization: `Bearer ${event.HubspotApiToken}`,
+      Authorization: `Bearer ${context.HUBSPOT_API_KEY}`,
     },
   });
 

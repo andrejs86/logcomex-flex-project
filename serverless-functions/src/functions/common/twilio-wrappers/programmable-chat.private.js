@@ -23,11 +23,11 @@ exports.updateChannelAttributes = async function updateChannelAttributes(paramet
 
   try {
     const client = context.getTwilioClient();
-    const channel = await client.chat.services(context.TWILIO_FLEX_CHAT_SERVICE_SID).channels(channelSid).fetch();
+    const channel = await client.chat.v2.services(context.TWILIO_FLEX_CHAT_SERVICE_SID).channels(channelSid).fetch();
 
     if (!channel) return { success: false, message: 'channel not found' };
 
-    const updatedChannel = await client.chat
+    const updatedChannel = await client.chat.v2
       .services(context.TWILIO_FLEX_CHAT_SERVICE_SID)
       .channels(channelSid)
       .update({ attributes });

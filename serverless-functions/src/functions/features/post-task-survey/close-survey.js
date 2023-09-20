@@ -37,14 +37,14 @@ exports.handler = async (context, event, callback) => {
       originalAttributes.conversations.kind = 'Survey';
       originalAttributes.conversations.case = 'Finalizou CSAT';
 
-      await client.taskrouter
+      await client.taskrouter.v1
         .workspaces(TWILIO_FLEX_WORKSPACE_SID)
         .tasks(tasks[0].sid)
         .update({
           attributes: JSON.stringify(originalAttributes),
         })
         .then(() => {
-          return client.taskrouter.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(tasks[0].sid).update({
+          return client.taskrouter.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(tasks[0].sid).update({
             assignmentStatus: 'canceled',
             reason: 'CSAT saved',
           });

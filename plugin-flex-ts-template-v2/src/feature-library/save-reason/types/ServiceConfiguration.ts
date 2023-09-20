@@ -1,6 +1,5 @@
 export default interface SaveReasonConfig {
   enabled: boolean;
-  hubspotApiToken: string;
   customObjectConversas: string;
   wrapupTimeout: number;
   reasons: Array<{ topic: string; options: string[] }>;

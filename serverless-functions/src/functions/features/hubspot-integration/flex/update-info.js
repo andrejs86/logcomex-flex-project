@@ -53,8 +53,12 @@ async function searchContact(value, hubspotAxiosInstance) {
   };
 
   const { data: contacts } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/contacts/search`, bodyRequest);
-  if (contacts.results.length > 0) return contacts.results[0].properties.hs_object_id;
+  if (contacts.results.length > 0) {
+    console.log('Contact found', contacts.results[0].properties.hs_object_id);
+    return contacts.results[0].properties.hs_object_id;
+  }
 
+  console.log('Contact NOT found');
   return false;
 }
 
@@ -66,8 +70,11 @@ async function editContactInfo(hubspot_id, number, hubspotAxiosInstance) {
         phone: formatedNumber,
       },
     });
+    console.log('Contact Info Updated on Hubspot');
     return true;
   } catch (error) {
+    console.error(error);
+    console.error('Contact Info NOT Updated on Hubspot');
     return false;
   }
 }
@@ -85,8 +92,11 @@ async function editSentMessageProperty(hubspot_id, newValue, message, hubspotAxi
     await hubspotAxiosInstance.patch(`${OBJECTS_URL}/contacts/${hubspot_id}`, {
       properties,
     });
+    console.log('Sent message property updated on Hubspot');
     return true;
   } catch (error) {
+    console.error(error);
+    console.error('Sent message property NOT updated on Hubspot');
     return false;
   }
 }
@@ -101,7 +111,7 @@ exports.handler = async (context, event, callback) => {
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
     headers: {
-      Authorization: `Bearer ${event.HubspotApiToken}`,
+      Authorization: `Bearer ${context.HUBSPOT_API_KEY}`,
     },
   });
 
@@ -124,11 +134,13 @@ exports.handler = async (context, event, callback) => {
       : await editContactInfo(hubspot_id, newNumber, hubspotAxiosInstance);
 
     if (updateResponse) {
+      console.log('Phone number updated');
       response.setBody({
         success: true,
         message: 'PhoneNumber Updated',
       });
     } else {
+      console.log('Phone number NOT updated');
       response.setBody({
         success: false,
         message: 'PhoneNumber Not Updated',
@@ -137,11 +149,12 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (err) {
+    console.error(err);
     response.setBody({
       success: false,
       message: `Error ${err}`,
     });
 
-    return callback(null, response);
+    return callback(err, response);
   }
 };

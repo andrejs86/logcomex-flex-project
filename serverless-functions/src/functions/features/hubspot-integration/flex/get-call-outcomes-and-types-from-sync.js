@@ -8,7 +8,7 @@ exports.handler = async (context, event, callback) => {
   const client = context.getTwilioClient();
 
   try {
-    const { data } = await client.sync
+    const { data } = await client.sync.v1
       .services(context.TWILIO_FLEX_SYNC_SID)
       .documents(context.TYPES_AND_OUTCOMES_SYNC_DOCUMENT_SID)
       .fetch();

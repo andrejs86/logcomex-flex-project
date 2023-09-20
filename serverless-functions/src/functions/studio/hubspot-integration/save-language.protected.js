@@ -25,7 +25,7 @@ exports.handler = async (context, event, callback) => {
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
     headers: {
-      Authorization: `Bearer ${context.PRIVATE_APP_TOKEN}`,
+      Authorization: `Bearer ${context.HUBSPOT_API_KEY}`,
     },
   });
 

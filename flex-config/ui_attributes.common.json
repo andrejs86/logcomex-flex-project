@@ -47,7 +47,8 @@
         "enabled": true
       },
       "schedule_manager": {
-        "enabled": true
+        "enabled": true,
+        "serverless_domain": ""
       },
       "hang_up_by": {
         "enabled": true
@@ -148,18 +149,15 @@
       },
       "hubspot_integration": {
         "enabled": true,
-        "hubspotApiToken": "",
         "internationalQueueSid": "WQadac584e22c20527c47a7c41d1d629c2",
         "everyoneQueueSid": "WQ4b0068acf853595708999f359d7b07a3"
       },
       "whatsapp_sender": {
         "enabled": true,
-        "hubspotApiToken": "",
         "whatsappNumber": "+554140426460"
       },
       "save_reason": {
         "enabled": true,
-        "hubspotApiToken": "",
         "customObjectConversas": "",
         "wrapupTimeout": 3600,
         "reasons": [
@@ -185,6 +183,7 @@
         "whatsappNotificationUrl": "https://drab-newt-3733.twil.io/assets/meet-message.mp3"
       },
       "post_task_survey": {
+        "enabled": true,
         "voiceSurveyEnabled": false,
         "whatsappSurveyEnabled": true,
         "surveyWorkflowSid": "WW1e5da4dfd06871da5b28321383908a39",

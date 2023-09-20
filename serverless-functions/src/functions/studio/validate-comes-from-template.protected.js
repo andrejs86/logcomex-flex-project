@@ -25,8 +25,8 @@ async function getMessageStatus(hubspotId, hubspotAxiosInstance) {
 }
 
 async function getWorkerStatus(email, client) {
-  const workers = await client.taskrouter
-    .workspaces(process.env.TWILIO_WORKSPACE_SID)
+  const workers = await client.taskrouter.v1
+    .workspaces(process.env.TWILIO_FLEX_WORKSPACE_SID)
     .workers.list({
       targetWorkersExpression: `email == '${email}'`,
     })
@@ -77,13 +77,13 @@ exports.handler = async (context, event, callback) => {
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
     headers: {
-      Authorization: `Bearer ${context.PRIVATE_APP_TOKEN}`,
+      Authorization: `Bearer ${context.HUBSPOT_API_KEY}`,
     },
   });
 
   try {
     const client = context.getTwilioClient();
-    const { workerEmail, hubspotId, sessionSid } = event;
+    const { workerEmail, hubspotId, conversationSid } = event;
 
     if (!hubspotId || !workerEmail) {
       response.setBody({
@@ -111,13 +111,12 @@ exports.handler = async (context, event, callback) => {
 
     await clearProperty(hubspotId, hubspotAxiosInstance);
 
-    const participants = await client.proxy.services(context.PROXY_SERVICE).sessions(sessionSid).participants.list();
+    const participants = await client.conversations.v1.conversations(conversationSid).participants.list();
 
-    await client.proxy
-      .services(context.PROXY_SERVICE)
-      .sessions(sessionSid)
-      .participants(participants[0].sid)
-      .messageInteractions.create({ body: `**Mensagem do template:** \n ${messageSend}` });
+    await client.conversations.v1.conversations(conversationSid).messages.create({
+      author: participants[0].messagingBinding.address,
+      body: `**Mensagem do template:** \n ${messageSend}`,
+    });
 
     response.setBody({ success: true, message, to, workerSkill: workerStatus.workerSkill });
     return callback(null, response);
