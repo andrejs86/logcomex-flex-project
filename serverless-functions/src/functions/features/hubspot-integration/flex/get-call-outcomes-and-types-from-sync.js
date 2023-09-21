@@ -10,7 +10,7 @@ exports.handler = async (context, event, callback) => {
   try {
     const { data } = await client.sync.v1
       .services(context.TWILIO_FLEX_SYNC_SID)
-      .documents(context.TYPES_AND_OUTCOMES_SYNC_DOCUMENT_SID)
+      .documents(event.TypesAndOutcomesDocumentSid)
       .fetch();
 
     response.setBody({ success: true, outcomes: data.outcomes, types: data.types });

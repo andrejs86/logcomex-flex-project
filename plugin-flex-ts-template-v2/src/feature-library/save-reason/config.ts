@@ -4,6 +4,7 @@ import SaveReasonConfig from './types/ServiceConfiguration';
 const {
   enabled = false,
   customObjectConversas = '',
+  typesAndOutcomesDocumentSid = '',
   wrapupTimeout = 120,
   reasons = [
     {
@@ -35,4 +36,8 @@ export const getWrapupTimeout = () => {
 
 export const getCustomObjectConversas = () => {
   return customObjectConversas;
+};
+
+export const getTypesAndOutcomesDocumentSid = () => {
+  return typesAndOutcomesDocumentSid;
 };

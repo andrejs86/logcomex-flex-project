@@ -1,5 +1,6 @@
 export default interface SaveReasonConfig {
   enabled: boolean;
+  typesAndOutcomesDocumentSid: string;
   customObjectConversas: string;
   wrapupTimeout: number;
   reasons: Array<{ topic: string; options: string[] }>;

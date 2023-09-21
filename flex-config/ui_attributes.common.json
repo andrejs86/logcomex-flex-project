@@ -158,7 +158,8 @@
       },
       "save_reason": {
         "enabled": true,
-        "customObjectConversas": "",
+        "typesAndOutcomesDocumentSid": "",
+        "customObjectConversas": "p23315776_conversa",
         "wrapupTimeout": 3600,
         "reasons": [
           {
@@ -191,6 +192,9 @@
         "whatsappSurveyMessage": "",
         "whatsappNumber": "+554140426460",
         "whatsappInboundStudioFlow": "FWfa53eced76c91bab4962d0eb77e89670"
+      },
+      "supervisor_kill_tasks": {
+        "enabled": false
       }
     }
   }

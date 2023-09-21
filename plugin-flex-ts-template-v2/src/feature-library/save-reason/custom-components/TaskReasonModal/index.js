@@ -30,24 +30,31 @@ import HubspotService from '../../utils/HubspotService';
 import TaskRouterService from '../../../../utils/serverless/TaskRouter/TaskRouterService';
 
 const saveHistoryMethod = async (flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal) => {
-  const responseSaveHistory = await HubspotService.SaveHistory(
-    task.attributes,
-    task.dateCreated,
-    task.dateUpdated,
-    workerAttributes,
-    task.taskChannelUniqueName,
-    selectedDeal,
-  );
+  try {
+    const responseSaveHistory = await HubspotService.SaveHistory(
+      task.attributes,
+      task.dateCreated,
+      task.dateUpdated,
+      workerAttributes,
+      task.taskChannelUniqueName,
+      selectedDeal,
+    );
 
-  if (responseSaveHistory) {
-    setIsOpenModal(false);
-    await task.setAttributes({
-      ...task.attributes,
-      reasonSelected: true,
-    });
-    console.log('invoking CompleteTask', task.sid);
-    Actions.invokeAction('CompleteTask', { sid: task.sid });
-  } else {
+    if (responseSaveHistory) {
+      setIsOpenModal(false);
+      await task.setAttributes({
+        ...task.attributes,
+        reasonSelected: true,
+      });
+      console.log('invoking CompleteTask', task.sid);
+      Actions.invokeAction('CompleteTask', { sid: task.sid });
+    } else {
+      setButtonDisabled(false);
+      setIsLoading(false);
+      flex.Notifications.showNotification('saveHistoryResponseFailed');
+    }
+  } catch (err) {
+    console.error('could not save history to Hubspot', err);
     setButtonDisabled(false);
     setIsLoading(false);
     flex.Notifications.showNotification('saveHistoryResponseFailed');

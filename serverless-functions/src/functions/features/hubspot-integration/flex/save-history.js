@@ -514,8 +514,15 @@ exports.handler = async (context, event, callback) => {
   response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
   response.appendHeader('Content-Type', 'application/json');
 
-  CONVERSAS_URL = `${OBJECTS_URL}/${event.CustomObjectConversas}`;
-  ASSOCIATIONS_URL_CONVERSAS = `${ASSOCIATIONS_URL}/${event.CustomObjectConversas}`;
+  const { taskCreatedDate, taskUpdatedDate, channelType, dealId, CustomObjectConversas } = event;
+  const taskAttributes = JSON.parse(event.taskAttributes);
+  const workerAttributes = JSON.parse(event.workerAttributes);
+
+  CONVERSAS_URL = `${OBJECTS_URL}/${CustomObjectConversas}`;
+  ASSOCIATIONS_URL_CONVERSAS = `${ASSOCIATIONS_URL}/${CustomObjectConversas}`;
+
+  console.log('Conversas URL', CONVERSAS_URL);
+  console.log('Associations URL', ASSOCIATIONS_URL_CONVERSAS);
 
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
@@ -523,10 +530,6 @@ exports.handler = async (context, event, callback) => {
       Authorization: `Bearer ${context.HUBSPOT_API_KEY}`,
     },
   });
-
-  const { taskCreatedDate, taskUpdatedDate, channelType, dealId } = event;
-  const taskAttributes = JSON.parse(event.taskAttributes);
-  const workerAttributes = JSON.parse(event.workerAttributes);
 
   if (!taskAttributes) {
     response.setBody({

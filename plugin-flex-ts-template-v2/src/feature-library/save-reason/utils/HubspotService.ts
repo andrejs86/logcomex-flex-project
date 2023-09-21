@@ -104,6 +104,7 @@ class HubspotService extends ApiService {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        TypesAndOutcomesDocumentSid: config.getTypesAndOutcomesDocumentSid(),
       };
 
       const url = `${this.serverlessProtocol}://${this.serverlessDomain}/features/hubspot-integration/flex/get-call-outcomes-and-types-from-sync`;
@@ -133,6 +134,7 @@ class HubspotService extends ApiService {
     taskAttributes.callDuration = await this.getRecordingsData(taskAttributes?.conversations?.segment_link);
 
     return new Promise((resolve, reject) => {
+      console.log('Conversas Object ---------> ', config.getCustomObjectConversas());
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
         CustomObjectConversas: config.getCustomObjectConversas(),

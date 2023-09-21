@@ -7,7 +7,6 @@ import * as config from '../../config';
 import { FlexComponent } from '../../../../types/feature-loader';
 
 const CANCELED_STATUS = 'canceled';
-const PENDING_STATUS = 'pending';
 
 const isCanceled = (reservation: any) =>
   reservation.status === CANCELED_STATUS || reservation.task.status === CANCELED_STATUS;
@@ -40,7 +39,7 @@ export const componentHook = function addSoundControlsToMainHeader(flex: typeof 
       className="button-stop-audio"
       key="custom-pause-audio"
       onClick={async () => {
-        flex.AudioPlayerManager.stop(mediaId);
+        Flex.AudioPlayerManager.stop(mediaId);
       }}
     >
       <VolumeOnIcon decorative={false} title="Parar áudio" size="sizeIcon40" color="colorTextBrandInverse" />
@@ -107,7 +106,7 @@ export const componentHook = function addSoundControlsToMainHeader(flex: typeof 
     async function playAudio() {
       if (reservation.task.attributes.direction === 'inbound') {
         const audioURL = `${protocol}://${domain}${port}/features/sound-notifications/alert_task_incoming.mp3`;
-        mediaId = await flex.AudioPlayerManager.play({
+        mediaId = Flex.AudioPlayerManager.play({
           url: audioURL,
           repeatable: true,
         });
@@ -131,14 +130,14 @@ export const componentHook = function addSoundControlsToMainHeader(flex: typeof 
 
     reservationEvents.forEach((eventName) => {
       reservation.addListener(eventName, () => {
-        flex.AudioPlayerManager.stop(mediaId);
-        console.log('parou o áudio.');
+        setTimeout(() => Flex.AudioPlayerManager.stop(mediaId), 1000);
+        console.log('parou o áudio (reservation event).', mediaId);
       });
     });
 
     reservation.on('canceled', (_res: any) => {
-      flex.AudioPlayerManager.stop(mediaId);
-      console.log('parou o áudio (canceled).');
+      Flex.AudioPlayerManager.stop(mediaId);
+      console.log('parou o áudio (canceled).', mediaId);
     });
 
     const showNotification = () => {
@@ -186,7 +185,7 @@ export const componentHook = function addSoundControlsToMainHeader(flex: typeof 
     const audioURL = `${protocol}://${domain}${port}/features/sound-notifications/message_incoming.mp3`;
 
     if (payload?.author?.includes('whatsapp')) {
-      await flex.AudioPlayerManager.play({
+      Flex.AudioPlayerManager.play({
         url: audioURL,
         repeatable: false,
       });
@@ -213,7 +212,7 @@ export const componentHook = function addSoundControlsToMainHeader(flex: typeof 
 
   voiceClientEvents.forEach((eventName) => {
     manager.voiceClient.on(eventName, async (_payload) => {
-      flex.AudioPlayerManager.stop(mediaId);
+      Flex.AudioPlayerManager.stop(mediaId);
     });
   });
 };
