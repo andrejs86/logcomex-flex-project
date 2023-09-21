@@ -145,7 +145,8 @@
       },
       "custom_queue_metrics": {
         "enabled": true,
-        "workspaceSid": "WSc8281b9baf2eb8632a65c9518d29ab70"
+        "workspaceSid": "WSc8281b9baf2eb8632a65c9518d29ab70",
+        "authToken": ""
       },
       "hubspot_integration": {
         "enabled": true,
@@ -194,7 +195,7 @@
         "whatsappInboundStudioFlow": "FWfa53eced76c91bab4962d0eb77e89670"
       },
       "supervisor_kill_tasks": {
-        "enabled": false
+        "enabled": true
       }
     }
   }

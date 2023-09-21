@@ -1,11 +1,12 @@
 import axios from 'axios';
+import * as Flex from '@twilio/flex-ui';
 
 import * as config from '../config';
 import { timer } from './timer';
 
 export const getTasks = async (params, setOnLoading, setTasksByQueue, setIntervalTasks) => {
   try {
-    const tokenAuthorization = `${config.getAccountSid()}:${config.getAuthToken()}`;
+    const tokenAuthorization = `${Flex.Manager.getInstance().configuration.sso.accountSid}:${config.getAuthToken()}`;
     const buffer = Buffer.from(tokenAuthorization);
 
     const tokenFormatted = buffer.toString('base64');

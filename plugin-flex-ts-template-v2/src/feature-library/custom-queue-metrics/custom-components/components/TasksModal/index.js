@@ -7,7 +7,7 @@ import { ExpandIcon } from '@twilio-paste/icons/esm/ExpandIcon';
 
 import Toastify from '../../../assets/toastify';
 import '../../../assets/toastify.css';
-import { ButtonList, Divisor, List } from './styles';
+import { Divisor } from './styles';
 import TaskList from '../TaskList';
 import {
   WaitingOnQueue,
