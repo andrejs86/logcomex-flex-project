@@ -164,7 +164,7 @@ const WhatsappSenderView = ({ manager }) => {
   };
 
   return (
-    <Box overflow="auto">
+    <Box element="WA_VIEW">
       {loading && (
         <LoadingContainer>
           <Spinner decorative={false} title="Carregando..." />;

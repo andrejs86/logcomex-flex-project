@@ -9,4 +9,9 @@ export const pasteElementHook = {
   WA_FORM_CONTROL: {
     margin: 'space30',
   },
+  WA_VIEW: {
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    width: '-webkit-fill-available',
+  },
 } as { [key: string]: PasteCustomCSS };
