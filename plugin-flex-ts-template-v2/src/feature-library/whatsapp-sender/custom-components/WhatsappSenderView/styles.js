@@ -25,6 +25,7 @@ export const Preview = styled('div')`
     background: #fff;
     padding: 10px 5px;
     border-radius: 10px;
+    font-size: small;
   }
 `;
 

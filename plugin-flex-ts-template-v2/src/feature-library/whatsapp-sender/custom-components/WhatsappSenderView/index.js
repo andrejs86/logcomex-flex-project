@@ -164,7 +164,7 @@ const WhatsappSenderView = ({ manager }) => {
   };
 
   return (
-    <>
+    <Box overflow="auto">
       {loading && (
         <LoadingContainer>
           <Spinner decorative={false} title="Carregando..." />;
@@ -242,7 +242,7 @@ const WhatsappSenderView = ({ manager }) => {
           </Column>
           <Column>
             <Preview>
-              <img src="https://drab-newt-3733.twil.io/assets/preview.png" alt="whatsapp-preview" />
+              <img src="https://drab-newt-3733.twil.io/assets/preview.png" alt="whatsapp-preview" height="400" />
               <p>{templateFiltered || 'Selecione um template para ver o preview'}</p>
             </Preview>
           </Column>
@@ -253,9 +253,10 @@ const WhatsappSenderView = ({ manager }) => {
             Enviar mensagem
           </Button>
         </FormActions>
+        <div>&nbsp;</div>
       </Form>
       <Toaster left={['space50', 'unset', 'unset']} {...toaster} />
-    </>
+    </Box>
   );
 };
 
