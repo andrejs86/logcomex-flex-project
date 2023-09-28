@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Input, Label, Text, useToaster, Combobox, Badge } from '@twilio-paste/core';
+import { Input, Box, Label, Text, useToaster, Combobox, Badge } from '@twilio-paste/core';
 import { MediaObject, MediaFigure, MediaBody } from '@twilio-paste/core/media-object';
 import { Form, FormControl, FormActions } from '@twilio-paste/core/form';
 import { Grid, Column } from '@twilio-paste/core/grid';
