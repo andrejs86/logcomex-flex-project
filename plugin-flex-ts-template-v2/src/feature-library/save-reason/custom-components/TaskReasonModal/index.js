@@ -194,7 +194,7 @@ const TaskReasonModal = (props) => {
       } else {
         setButtonDisabled(false);
         setIsLoading(false);
-        if (confirm('Contato não encontrado no Hubspot, não será vinculado. Deseja finalizar mesmo assim?')) {
+        if (confirm('Erro ao salvar no Hubspot. Este contato pode não ser vinculado. Deseja finalizar mesmo assim?')) {
           await task.setAttributes({
             ...task.attributes,
             reasonSelected: true,
