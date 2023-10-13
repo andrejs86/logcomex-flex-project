@@ -7,7 +7,6 @@ let CONVERSAS_URL = '';
 let ASSOCIATIONS_URL_CONVERSAS = '';
 
 // get message history of conversation between client, bot and Agent
-
 async function getMessages(conversationSid, createdTaskDate) {
   const messages = await client.chat.v2
     .services(process.env.TWILIO_FLEX_CHAT_SERVICE_SID)
@@ -95,13 +94,19 @@ async function createConversaAndNote(
       },
     };
 
+    console.log('creating conversa...', conversasPost);
     const conversaObject = await hubspotAxiosInstance.post(CONVERSAS_URL, conversasPost);
+    console.log('conversa created!');
 
-    // creating a note for store the messages
-    const noteObject = await hubspotAxiosInstance.post(`/engagements/v1/engagements`, {
+    const note = {
       engagement: { active: true, type: 'NOTE' },
       metadata: { body: noteMessage },
-    });
+    };
+
+    console.log('creating note...', note);
+    // creating a note for store the messages
+    const noteObject = await hubspotAxiosInstance.post(`/engagements/v1/engagements`, note);
+    console.log('note created!');
 
     return {
       success: true,
@@ -109,6 +114,7 @@ async function createConversaAndNote(
       noteId: noteObject.data.engagement.id,
     };
   } catch (error) {
+    console.log('could not create conversa and note');
     console.log(error.message);
     return { success: false, message: error.message };
   }
@@ -125,16 +131,19 @@ async function createConversaAndCall(
   hubspotAxiosInstance,
 ) {
   try {
+    console.log('creating conversa and call...');
+
     const clientFullName = `${taskAttributes?.clientInformation?.firstname} ${
       taskAttributes?.clientInformation?.lastname || ''
     }`;
 
     const title = `${clientFullName} (${hubspotId || 'Sem Hubspot ID'})`;
+
+    console.log('getting agentHS...');
     const agentHS = await hubspotAxiosInstance.get(`/crm/v3/owners?email=${workerInformation.workerEmail}`);
     const agentId = agentHS?.data?.results[0]?.id;
 
-    // creating a data on our custom object
-    const conversaObject = await hubspotAxiosInstance.post(CONVERSAS_URL, {
+    const convProps = {
       properties: {
         historico_de_atendimento: title,
         agent_name: workerInformation.workerName,
@@ -143,14 +152,20 @@ async function createConversaAndCall(
         conversa_fechada_date: updatedTaskDate,
         canal: channelType,
       },
-    });
+    };
+
+    console.log('Conversa props=', convProps);
+
+    // creating a data on our custom object
+    const conversaObject = await hubspotAxiosInstance.post(CONVERSAS_URL, convProps);
+    console.log('Conversa created!', conversaObject);
 
     const callDuration = taskAttributes.callDuration;
     const taskAge = callDuration ? Number(callDuration) * 1000 : updatedTaskDate - createdTaskDate;
     // creating a note for store the messages
     const messageFailToGetTaskDetails = 'Sem descrição de atendimento informada ou não foi possível salvar os dados';
 
-    const callObject = await hubspotAxiosInstance.post(`${OBJECTS_URL}/calls`, {
+    const callProps = {
       properties: {
         hs_call_disposition: taskAttributes.call_outcome,
         hs_activity_type: taskAttributes.call_type,
@@ -167,7 +182,11 @@ async function createConversaAndCall(
         hs_call_status: 'COMPLETED',
         hs_call_direction: taskAttributes.direction.toUpperCase(),
       },
-    });
+    };
+
+    console.log('creating call...', callProps);
+    const callObject = await hubspotAxiosInstance.post(`${OBJECTS_URL}/calls`, callProps);
+    console.log('call created!');
 
     return {
       success: true,
@@ -175,7 +194,8 @@ async function createConversaAndCall(
       callId: callObject.data.id,
     };
   } catch (error) {
-    console.log(error);
+    console.log('Could not create conversa or call');
+    console.log(error.message);
     return { success: false, message: error.message };
   }
 }
@@ -507,6 +527,8 @@ async function searchCompany(value, hubspotAxiosInstance) {
 }
 
 exports.handler = async (context, event, callback) => {
+  console.log('SAVING HISTORY');
+
   const response = new Twilio.Response();
 
   response.appendHeader('Access-Control-Allow-Origin', '*');
@@ -515,8 +537,14 @@ exports.handler = async (context, event, callback) => {
   response.appendHeader('Content-Type', 'application/json');
 
   const { taskCreatedDate, taskUpdatedDate, channelType, dealId, CustomObjectConversas } = event;
-  const taskAttributes = JSON.parse(event.taskAttributes);
-  const workerAttributes = JSON.parse(event.workerAttributes);
+  console.log('TASK ATTRIBUTES= ', event?.taskAttributes);
+  console.log('WORKER ATTRIBUTES= ', event?.workerAttributes);
+
+  const taskAttributes = JSON.parse(event?.taskAttributes);
+  const workerAttributes = JSON.parse(event?.workerAttributes);
+
+  console.log('TASK ATTRIBUTES PARSED= ', taskAttributes);
+  console.log('WORKER ATTRIBUTES PARSED= ', workerAttributes);
 
   CONVERSAS_URL = `${OBJECTS_URL}/${CustomObjectConversas}`;
   ASSOCIATIONS_URL_CONVERSAS = `${ASSOCIATIONS_URL}/${CustomObjectConversas}`;
@@ -532,6 +560,7 @@ exports.handler = async (context, event, callback) => {
   });
 
   if (!taskAttributes) {
+    console.log('TASK ATTRIBUTES IS UNDEFINED!!');
     response.setBody({
       success: false,
       message: 'Task attributes undefined',
