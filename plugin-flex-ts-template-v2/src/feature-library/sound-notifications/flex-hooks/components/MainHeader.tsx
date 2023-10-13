@@ -108,7 +108,7 @@ export const componentHook = function addSoundControlsToMainHeader(flex: typeof 
         const audioURL = `${protocol}://${domain}${port}/features/sound-notifications/alert_task_incoming.mp3`;
         mediaId = Flex.AudioPlayerManager.play({
           url: audioURL,
-          repeatable: true,
+          repeatable: false,
         });
       }
     }
