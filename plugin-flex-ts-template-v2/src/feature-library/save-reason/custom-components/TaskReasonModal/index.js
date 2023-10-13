@@ -29,79 +29,6 @@ import * as config from '../../config';
 import HubspotService from '../../utils/HubspotService';
 import TaskRouterService from '../../../../utils/serverless/TaskRouter/TaskRouterService';
 
-const saveHistoryMethod = async (flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal) => {
-  try {
-    const responseSaveHistory = await HubspotService.SaveHistory(
-      task.attributes,
-      task.dateCreated,
-      task.dateUpdated,
-      workerAttributes,
-      task.taskChannelUniqueName,
-      selectedDeal,
-    );
-
-    if (responseSaveHistory) {
-      setIsOpenModal(false);
-      await task.setAttributes({
-        ...task.attributes,
-        reasonSelected: true,
-      });
-      console.log('invoking CompleteTask', task.sid);
-      Actions.invokeAction('CompleteTask', { sid: task.sid });
-    } else {
-      setButtonDisabled(false);
-      setIsLoading(false);
-      flex.Notifications.showNotification('saveHistoryResponseFailed');
-    }
-  } catch (err) {
-    console.error('could not save history to Hubspot', err);
-    setButtonDisabled(false);
-    setIsLoading(false);
-    flex.Notifications.showNotification('saveHistoryResponseFailed');
-  }
-};
-
-async function getSegmentLinkFallback(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal) {
-  const data = await TaskRouterService.getTask(task.taskSid);
-  const taskAttributes = data.attributes;
-  const segmentLink = taskAttributes?.conversations?.segment_link;
-
-  if (task.attributes.conversations) {
-    task.attributes.conversations = {
-      ...task.attributes.conversations,
-      segment_link: segmentLink,
-    };
-  } else {
-    task.attributes = {
-      ...task.attributes,
-      conversations: {
-        segment_link: segmentLink,
-      },
-    };
-  }
-
-  await saveHistoryMethod(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal);
-}
-
-async function saveHistory(flex, task, selectedDeal, setIsOpenModal, setButtonDisabled) {
-  const taskAttributes = task.attributes;
-  const workerInstance = flex.Manager.getInstance().workerClient;
-  const workerAttributes = {
-    workerName: workerInstance.attributes.full_name || workerInstance.name,
-    workerEmail: workerInstance.attributes.email,
-  };
-
-  if (!taskAttributes?.conversations?.segment_link) {
-    setTimeout(async () => {
-      await getSegmentLinkFallback(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal);
-    }, 2000);
-
-    return;
-  }
-
-  await saveHistoryMethod(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal);
-}
-
 const TaskReasonModal = (props) => {
   const flex = props.flex;
   const task = props.task;
@@ -243,6 +170,95 @@ const TaskReasonModal = (props) => {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  const saveHistoryMethod = async (flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal) => {
+    try {
+      const responseSaveHistory = await HubspotService.SaveHistory(
+        task.attributes,
+        task.dateCreated,
+        task.dateUpdated,
+        workerAttributes,
+        task.taskChannelUniqueName,
+        selectedDeal,
+      );
+
+      if (responseSaveHistory) {
+        await task.setAttributes({
+          ...task.attributes,
+          reasonSelected: true,
+        });
+        setIsOpenModal(false);
+        console.log('invoking CompleteTask', task.sid);
+        Actions.invokeAction('CompleteTask', { sid: task.sid });
+      } else {
+        setButtonDisabled(false);
+        setIsLoading(false);
+        if (confirm('Contato não encontrado no Hubspot, não será vinculado. Deseja finalizar mesmo assim?')) {
+          await task.setAttributes({
+            ...task.attributes,
+            reasonSelected: true,
+          });
+          console.log('invoking FORCED CompleteTask', task.sid);
+          Actions.invokeAction('CompleteTask', { sid: task.sid });
+          setIsOpenModal(false);
+        }
+      }
+    } catch (err) {
+      console.error('could not save history to Hubspot', err);
+      setButtonDisabled(false);
+      setIsLoading(false);
+      if (confirm('Contato não encontrado no Hubspot, não será vinculado. Deseja finalizar mesmo assim?')) {
+        await task.setAttributes({
+          ...task.attributes,
+          reasonSelected: true,
+        });
+        console.log('invoking FORCED CompleteTask', task.sid);
+        Actions.invokeAction('CompleteTask', { sid: task.sid });
+        setIsOpenModal(false);
+      }
+    }
+  };
+
+  async function getSegmentLinkFallback(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal) {
+    const data = await TaskRouterService.getTask(task.taskSid);
+    const taskAttributes = data.attributes;
+    const segmentLink = taskAttributes?.conversations?.segment_link;
+
+    if (task.attributes.conversations) {
+      task.attributes.conversations = {
+        ...task.attributes.conversations,
+        segment_link: segmentLink,
+      };
+    } else {
+      task.attributes = {
+        ...task.attributes,
+        conversations: {
+          segment_link: segmentLink,
+        },
+      };
+    }
+
+    await saveHistoryMethod(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal);
+  }
+
+  async function saveHistory(flex, task, selectedDeal, setIsOpenModal, setButtonDisabled) {
+    const taskAttributes = task.attributes;
+    const workerInstance = flex.Manager.getInstance().workerClient;
+    const workerAttributes = {
+      workerName: workerInstance.attributes.full_name || workerInstance.name,
+      workerEmail: workerInstance.attributes.email,
+    };
+
+    if (!taskAttributes?.conversations?.segment_link) {
+      setTimeout(async () => {
+        await getSegmentLinkFallback(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal);
+      }, 2000);
+
+      return;
+    }
+
+    await saveHistoryMethod(flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal);
   }
 
   return (
