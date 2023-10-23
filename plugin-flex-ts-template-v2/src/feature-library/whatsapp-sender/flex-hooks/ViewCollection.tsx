@@ -21,10 +21,10 @@ export const componentHook = function addWhatsappSenderView(flex: typeof Flex, m
   };
 
   flex.ViewCollection.Content.add(
-    <Provider config={rollbarConfig} key="rollbar-wa-sender">
-      <Flex.View name="whatsapp-view" key="whatsapp-view">
+    <Flex.View name="whatsapp-view" key="whatsapp-view">
+      <Provider config={rollbarConfig} key="rollbar-wa-sender">
         <WhatsappSenderView key="co-whatsapp-view" manager={manager} />
-      </Flex.View>
-    </Provider>,
+      </Provider>
+    </Flex.View>,
   );
 };
