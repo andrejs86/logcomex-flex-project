@@ -29,13 +29,13 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: `Client ${typeSearch || 'email'} is undefined`,
     });
-    console.error('typeSearch not specified');
+    console.log('typeSearch not specified');
     return callback('typeSearch not specified', response);
   }
 
   if (typeSearch.includes('phone') && !regexNumber.test(value.replace(/[A-Za-z\:\+]/g, ''))) {
     response.setBody({ success: false, message: 'Value type is invalid' });
-    console.error('value not specified');
+    console.log('value not specified');
     return callback('value not specified', response);
   }
 

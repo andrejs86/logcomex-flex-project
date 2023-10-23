@@ -73,8 +73,8 @@ async function editContactInfo(hubspot_id, number, hubspotAxiosInstance) {
     console.log('Contact Info Updated on Hubspot');
     return true;
   } catch (error) {
-    console.error(error);
-    console.error('Contact Info NOT Updated on Hubspot');
+    console.log(error);
+    console.log('Contact Info NOT Updated on Hubspot');
     return false;
   }
 }
@@ -95,8 +95,8 @@ async function editSentMessageProperty(hubspot_id, newValue, message, hubspotAxi
     console.log('Sent message property updated on Hubspot');
     return true;
   } catch (error) {
-    console.error(error);
-    console.error('Sent message property NOT updated on Hubspot');
+    console.log(error);
+    console.log('Sent message property NOT updated on Hubspot');
     return false;
   }
 }
@@ -149,7 +149,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (err) {
-    console.error(err);
+    console.log(err);
     response.setBody({
       success: false,
       message: `Error ${err}`,

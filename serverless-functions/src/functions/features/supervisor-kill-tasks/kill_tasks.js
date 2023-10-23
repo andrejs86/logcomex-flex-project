@@ -28,7 +28,7 @@ exports.handler = async (context, event, callback) => {
     twilioResponse.setBody({ success: true });
     return callback(null, twilioResponse);
   } catch (err) {
-    console.error(err);
+    console.log(err);
     return callback(err, null);
   }
 };

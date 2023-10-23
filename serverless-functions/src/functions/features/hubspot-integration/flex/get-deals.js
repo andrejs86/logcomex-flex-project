@@ -37,20 +37,25 @@ exports.handler = async (context, event, callback) => {
     for (const deal of ContactDeals.results) {
       const { data: contactDeal } = await hubspotAxiosInstance.get(`/crm/v3/objects/deals/${deal.toObjectId}`, {
         params: {
-          properties: 'dealname, closedate, createdate, dealstage, hubspot_owner_id, hubspot_object_id',
+          properties: 'dealname,closedate,createdate,dealstage,hubspot_owner_id,hubspot_object_id',
           archived: 'false',
         },
       });
 
-      const { data: owner } = await hubspotAxiosInstance.get(
-        `/crm/v3/owners/${contactDeal.properties.hubspot_owner_id}`,
-        {
+      let owner = { email: '' };
+      try {
+        const result = await hubspotAxiosInstance.get(`/crm/v3/owners/${contactDeal.properties.hubspot_owner_id}`, {
           params: {
-            properties: 'hubspot_owner_id, email,lastname,firstname',
+            properties: 'hubspot_owner_id,email,lastname,firstname',
             archived: 'false',
           },
-        },
-      );
+        });
+
+        owner = result.data;
+      } catch (err) {
+        console.log('Could not find owner!');
+        console.log(err);
+      }
 
       deals.contactDeals.push({
         ...contactDeal,
@@ -69,20 +74,25 @@ exports.handler = async (context, event, callback) => {
       for (const deal of CompanyDeals.results) {
         const { data: companyDeal } = await hubspotAxiosInstance.get(`/crm/v3/objects/deals/${deal.toObjectId}`, {
           params: {
-            properties: 'dealname, closedate, createdate, dealstage, hubspot_owner_id, hubspot_object_id',
+            properties: 'dealname,closedate,createdate,dealstage,hubspot_owner_id,hubspot_object_id',
             archived: 'false',
           },
         });
 
-        const { data: owner } = await hubspotAxiosInstance.get(
-          `/crm/v3/owners/${companyDeal.properties.hubspot_owner_id}`,
-          {
+        let owner = { email: '' };
+        try {
+          const result = await hubspotAxiosInstance.get(`/crm/v3/owners/${companyDeal.properties.hubspot_owner_id}`, {
             params: {
-              properties: 'hubspot_owner_id, email,lastname,firstname',
+              properties: 'hubspot_owner_id,email,lastname,firstname',
               archived: 'false',
             },
-          },
-        );
+          });
+
+          owner = result.data;
+        } catch (err) {
+          console.log('Could not find owner!');
+          console.log(err);
+        }
 
         deals.companyDeals.push({
           ...companyDeal,

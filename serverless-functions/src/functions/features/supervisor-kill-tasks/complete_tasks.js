@@ -38,8 +38,8 @@ exports.handler = async (context, event, callback) => {
     twilioResponse.setBody('success');
     return callback(null, twilioResponse);
   } catch (error) {
-    console.error(error);
-    console.error('could not complete task');
+    console.log(error);
+    console.log('could not complete task');
     return callback(error, error.message);
   }
 };

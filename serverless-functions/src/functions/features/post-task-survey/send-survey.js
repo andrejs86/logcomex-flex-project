@@ -98,8 +98,8 @@ exports.handler = async (context, event, callback) => {
     console.log('successfully sent survey');
     return callback(null, response);
   } catch (err) {
-    console.error('could not send survey');
-    console.error(err);
+    console.log('could not send survey');
+    console.log(err);
     const response = responseHelper.genericErrorResponse(err.message);
     return callback(response);
   }
@@ -127,7 +127,7 @@ const sendOutboundMessage = async (context, outboundMessageParams) => {
     // Handle existing conversation in progress
     if (existingConversationDetails) {
       if (existingConversationDetails.taskExists) {
-        console.error('There was already an active conversation and a task for this customer - cannot reuse it');
+        console.log('There was already an active conversation and a task for this customer - cannot reuse it');
       } else {
         // For the scenario where:
         // "We are waiting until the customer replies before creating a task &&
@@ -164,6 +164,6 @@ const sendOutboundMessage = async (context, outboundMessageParams) => {
   } catch (err) {
     // If there's an error, send an error response
     // Keep using the response object for CORS purposes
-    console.error(err);
+    console.log(err);
   }
 };

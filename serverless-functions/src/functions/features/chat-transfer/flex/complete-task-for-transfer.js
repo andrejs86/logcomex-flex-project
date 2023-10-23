@@ -42,7 +42,7 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
           channelSid,
         });
       } catch (error) {
-        console.error('Error updating chat channel with task sid as completed');
+        console.log('Error updating chat channel with task sid as completed');
       }
     }
 

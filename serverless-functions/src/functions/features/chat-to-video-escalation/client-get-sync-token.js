@@ -38,7 +38,7 @@ exports.handler = prepareStudioFunction(requiredParameters, async (context, even
       .documentPermissions(client_identity)
       .update({ read: true, write: false, manage: false })
       .catch((reason) => {
-        console.error(`Error giving permission to ${code}: ${reason}`);
+        console.log(`Error giving permission to ${code}: ${reason}`);
         return null;
       });
 

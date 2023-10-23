@@ -48,7 +48,7 @@ exports.retryHandler = async (error, parameters, callback) => {
     isNumber(attempts) &&
     attempts < TWILIO_SERVICE_RETRY_LIMIT
   ) {
-    console.warn(
+    console.log(
       `retrying ${context.PATH}.${callback.name}() after ${retryAttemptsMessage}, http-status-code: ${status}`,
     );
     if (status === 429 || status === 503) await snooze(random(TWILIO_SERVICE_MIN_BACKOFF, TWILIO_SERVICE_MAX_BACKOFF));
@@ -60,7 +60,7 @@ exports.retryHandler = async (error, parameters, callback) => {
 
   if (ENABLE_LOCAL_LOGGING) {
     const logMessage = `\n\n${context.PATH}.${callback.name}() failed after ${retryAttemptsMessage},\n http-status-code\t: ${status},\n twilio-error-code\t: ${twilioErrorCode},\n twilio-doc-page\t: ${twilioDocPage},\n error-message\t\t: ${message}`;
-    console.error(logMessage);
+    console.log(logMessage);
   }
   return { success: false, message, status, twilioErrorCode, twilioDocPage };
 };

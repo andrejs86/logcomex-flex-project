@@ -11,14 +11,14 @@ const prepareFunction = (context, event, callback, requiredParameters, handlerFn
   response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (parameterError) {
-    console.error(`(${context.PATH}) invalid parameters passed`);
+    console.log(`(${context.PATH}) invalid parameters passed`);
     response.setStatusCode(400);
     response.setBody({ data: null, message: parameterError });
     return callback(null, response);
   }
 
   const handleError = (error) => {
-    console.error(`(${context.PATH}) Unexpected error occurred: ${error}`);
+    console.log(`(${context.PATH}) Unexpected error occurred: ${error}`);
     response.setStatusCode(500);
     response.setBody({
       success: false,

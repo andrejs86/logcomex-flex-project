@@ -130,7 +130,7 @@ async function handleCallbackOrVoicemailSelected(context, isVoicemail, callSid, 
     //  Cancel (update) the task with handy attributes for reporting
     await cancelTask(context, task, cancelReason);
   } else {
-    console.error(`Failed to update call ${callSid} with new TwiML. Status: ${status}`);
+    console.log(`Failed to update call ${callSid} with new TwiML. Status: ${status}`);
     twiml.say(options.sayOptions, options.messages.processingError);
     twiml.redirect(
       `${domain}/features/callback-and-voicemail/studio/wait-experience?mode=main-wait-loop&CallSid=${callSid}&enqueuedTaskSid=${taskSid}&skipGreeting=true`,
@@ -168,7 +168,7 @@ exports.handler = async (context, event, callback) => {
         twiml.redirect(redirectBaseUrl + (enqueuedTask ? `&enqueuedTaskSid=${enqueuedTask.sid}` : ''));
       } else {
         // Log an error for our own debugging purposes, but don't fail the call
-        console.error(
+        console.log(
           `Failed to find the pending task with callSid: ${CallSid}. This is potentially due to higher call volume than the API query had accounted for.`,
         );
         twiml.redirect(redirectBaseUrl);

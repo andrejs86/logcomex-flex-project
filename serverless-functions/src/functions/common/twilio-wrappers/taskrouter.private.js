@@ -107,7 +107,7 @@ exports.completeTask = async function completeTask(parameters) {
     // in which case it is also assumed to be completed
     // https://www.twilio.com/docs/api/errors/20404
     if (error.code === 20001 || error.code === 20404) {
-      console.warn(`${context.PATH}.completeTask(): ${error.message}`);
+      console.log(`${context.PATH}.completeTask(): ${error.message}`);
       return {
         success: true,
         status: 200,
@@ -166,7 +166,7 @@ exports.updateReservation = async function updateReservation(parameters) {
     // in which case it is also assumed to be completed
     // https://www.twilio.com/docs/api/errors/20404
     if (error.code === 20001 || error.code === 20404) {
-      console.warn(`${context.PATH}.updateReservation(): ${error.message}`);
+      console.log(`${context.PATH}.updateReservation(): ${error.message}`);
       return {
         success: true,
         status: 200,
@@ -379,7 +379,7 @@ exports.updateTask = async function updateTask(parameters) {
     // in which case it is also assumed to be completed
     // https://www.twilio.com/docs/api/errors/20404
     if (error.code === 20001 || error.code === 20404) {
-      console.warn(`${context.PATH}.updateTask(): ${error.message}`);
+      console.log(`${context.PATH}.updateTask(): ${error.message}`);
       return {
         success: true,
         status: 200,
@@ -428,7 +428,7 @@ exports.fetchTask = async function fetchTask(parameters) {
     // in which case it is also assumed to be completed
     // https://www.twilio.com/docs/api/errors/20404
     if (error.code === 20001 || error.code === 20404) {
-      console.warn(`${context.PATH}.fetchTask(): ${error.message}`);
+      console.log(`${context.PATH}.fetchTask(): ${error.message}`);
       return {
         success: true,
         status: 200,

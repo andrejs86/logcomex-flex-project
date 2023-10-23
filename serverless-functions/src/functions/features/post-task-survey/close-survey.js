@@ -54,14 +54,14 @@ exports.handler = async (context, event, callback) => {
     }
 
     if (tasks.length === 0) {
-      console.error('task not found!');
+      console.log('task not found!');
     }
 
     const response = responseHelper.defaultResponse();
     response.setBody({ message: 'Survey successfully finalized' });
     return callback(null, response);
   } catch (err) {
-    console.error(err);
+    console.log(err);
     const response = responseHelper.defaultResponse();
     response.setBody({ message: 'Failed to save CSAT results to task attribute' });
     return callback(response);

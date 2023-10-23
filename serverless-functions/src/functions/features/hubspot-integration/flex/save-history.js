@@ -1,5 +1,12 @@
 const axios = require('axios');
 const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
+const Rollbar = require('rollbar');
+
+const logger = new Rollbar({
+  accessToken: '751d928dc2dd4ce48b50202b18bd738a',
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+});
 
 const OBJECTS_URL = `/crm/v3/objects`;
 const ASSOCIATIONS_URL = `/crm/v3/associations`;
@@ -73,6 +80,7 @@ async function createConversaAndNote(
   channelType,
   noteMessage,
   hubspotAxiosInstance,
+  logParams,
 ) {
   try {
     const clientFullName = `${taskAttributes?.clientInformation?.firstname} ${
@@ -94,28 +102,24 @@ async function createConversaAndNote(
       },
     };
 
-    console.log('creating conversa...', conversasPost);
     const conversaObject = await hubspotAxiosInstance.post(CONVERSAS_URL, conversasPost);
-    console.log('conversa created!');
 
     const note = {
       engagement: { active: true, type: 'NOTE' },
       metadata: { body: noteMessage },
     };
 
-    console.log('creating note...', note);
-    // creating a note for store the messages
+    // creating a note to store the messages
     const noteObject = await hubspotAxiosInstance.post(`/engagements/v1/engagements`, note);
-    console.log('note created!');
 
+    logger.info('Conversa and Note successfully created.', logParams, conversaObject, noteObject);
     return {
       success: true,
       conversaId: conversaObject.data.id,
       noteId: noteObject.data.engagement.id,
     };
   } catch (error) {
-    console.log('could not create conversa and note');
-    console.log(error.message);
+    logger.error('could not create conversa and note', logParams, error);
     return { success: false, message: error.message };
   }
 }
@@ -129,17 +133,15 @@ async function createConversaAndCall(
   workerInformation,
   channelType,
   hubspotAxiosInstance,
+  logParams,
 ) {
   try {
-    console.log('creating conversa and call...');
-
     const clientFullName = `${taskAttributes?.clientInformation?.firstname} ${
       taskAttributes?.clientInformation?.lastname || ''
     }`;
 
     const title = `${clientFullName} (${hubspotId || 'Sem Hubspot ID'})`;
 
-    console.log('getting agentHS...');
     const agentHS = await hubspotAxiosInstance.get(`/crm/v3/owners?email=${workerInformation.workerEmail}`);
     const agentId = agentHS?.data?.results[0]?.id;
 
@@ -154,12 +156,8 @@ async function createConversaAndCall(
       },
     };
 
-    console.log('Conversa props=', convProps);
-
     // creating a data on our custom object
     const conversaObject = await hubspotAxiosInstance.post(CONVERSAS_URL, convProps);
-    console.log('Conversa created!', conversaObject);
-
     const callDuration = taskAttributes.callDuration;
     const taskAge = callDuration ? Number(callDuration) * 1000 : updatedTaskDate - createdTaskDate;
     // creating a note for store the messages
@@ -184,9 +182,9 @@ async function createConversaAndCall(
       },
     };
 
-    console.log('creating call...', callProps);
     const callObject = await hubspotAxiosInstance.post(`${OBJECTS_URL}/calls`, callProps);
-    console.log('call created!');
+
+    logger.info('Call and Conversa successfully created.', logParams, callObject, conversaObject);
 
     return {
       success: true,
@@ -194,14 +192,22 @@ async function createConversaAndCall(
       callId: callObject.data.id,
     };
   } catch (error) {
-    console.log('Could not create conversa or call');
-    console.log(error.message);
+    logger.error('Could not create conversa or call', logParams, error);
     return { success: false, message: error.message };
   }
 }
 
 // create all relation on call between conversa and contact
-async function createCallRelations(conversaId, callId, hubspotId, ticketId, companyId, hubspotAxiosInstance, dealId) {
+async function createCallRelations(
+  conversaId,
+  callId,
+  hubspotId,
+  ticketId,
+  companyId,
+  hubspotAxiosInstance,
+  dealId,
+  logParams,
+) {
   try {
     await hubspotAxiosInstance.post(`${ASSOCIATIONS_URL_CONVERSAS}/call/batch/create`, {
       inputs: [
@@ -316,16 +322,16 @@ async function createCallRelations(conversaId, callId, hubspotId, ticketId, comp
         ],
       });
     }
-
+    logger.debug('Call relations successfully created.', logParams);
     return { success: true };
   } catch (err) {
-    console.log(err.message);
+    logger.error('Could not create call relations', logParams, err);
     return { success: false, message: err.message };
   }
 }
 
 // create all relation between conversa, contact and note
-async function createRelations(conversaId, noteId, hubspotId, ticketId, companyId, hubspotAxiosInstance) {
+async function createRelations(conversaId, noteId, hubspotId, ticketId, companyId, hubspotAxiosInstance, logParams) {
   try {
     // making a relation between conversa(our custom object) and the note
     await hubspotAxiosInstance.post(`${ASSOCIATIONS_URL_CONVERSAS}/note/batch/create`, {
@@ -457,15 +463,16 @@ async function createRelations(conversaId, noteId, hubspotId, ticketId, companyI
         ],
       });
     }
-
+    logger.debug('Relations successfully created.', logParams);
     return { success: true };
   } catch (err) {
     console.log(err.message);
+    logger.error('Could not create relations', logParams, err);
     return { success: false, message: err.message };
   }
 }
 
-async function searchCompany(value, hubspotAxiosInstance) {
+async function searchCompany(value, hubspotAxiosInstance, logParams) {
   try {
     const newValue = value.replace(/[A-Za-z\:\+]/g, '');
     const withNine = `${newValue.substring(0, 4)}9${newValue.substring(4)}`;
@@ -521,14 +528,12 @@ async function searchCompany(value, hubspotAxiosInstance) {
 
     return companies.results.length > 0 ? companies.results[0].id : false;
   } catch (error) {
-    console.log(error);
+    logger.error('Could not find company!', logParams, error);
     return false;
   }
 }
 
 exports.handler = async (context, event, callback) => {
-  console.log('SAVING HISTORY');
-
   const response = new Twilio.Response();
 
   response.appendHeader('Access-Control-Allow-Origin', '*');
@@ -537,20 +542,20 @@ exports.handler = async (context, event, callback) => {
   response.appendHeader('Content-Type', 'application/json');
 
   const { taskCreatedDate, taskUpdatedDate, channelType, dealId, CustomObjectConversas } = event;
-  console.log('TASK ATTRIBUTES= ', event?.taskAttributes);
-  console.log('WORKER ATTRIBUTES= ', event?.workerAttributes);
-
   const taskAttributes = JSON.parse(event?.taskAttributes);
   const workerAttributes = JSON.parse(event?.workerAttributes);
 
-  console.log('TASK ATTRIBUTES PARSED= ', taskAttributes);
-  console.log('WORKER ATTRIBUTES PARSED= ', workerAttributes);
+  const logParams = {
+    phoneNumber: taskAttributes?.from,
+    channelType,
+    dealId,
+    taskAttributes,
+    workerAttributes,
+    taskSid: taskAttributes?.taskSid,
+  };
 
   CONVERSAS_URL = `${OBJECTS_URL}/${CustomObjectConversas}`;
   ASSOCIATIONS_URL_CONVERSAS = `${ASSOCIATIONS_URL}/${CustomObjectConversas}`;
-
-  console.log('Conversas URL', CONVERSAS_URL);
-  console.log('Associations URL', ASSOCIATIONS_URL_CONVERSAS);
 
   const hubspotAxiosInstance = axios.create({
     baseURL: 'https://api.hubapi.com',
@@ -560,12 +565,12 @@ exports.handler = async (context, event, callback) => {
   });
 
   if (!taskAttributes) {
-    console.log('TASK ATTRIBUTES IS UNDEFINED!!');
+    logger.error('Task attributes is undefined!', logParams);
     response.setBody({
       success: false,
       message: 'Task attributes undefined',
     });
-    return callback(null, response);
+    return callback(response);
   }
 
   const createdTaskDate = new Date(taskCreatedDate).getTime();
@@ -578,14 +583,13 @@ exports.handler = async (context, event, callback) => {
 
   try {
     if (channelType === 'voice') {
-      console.log('Voice');
       if (!taskAttributes.conversations && !taskAttributes.conversations?.segment_link) {
+        logger.error('recording link is unavailable!', logParams);
         response.setBody({
           success: false,
           errorMessage: 'Link da gravação indisponível',
         });
-        console.log(response.body.errorMessage);
-        return callback(null, response);
+        return callback(response);
       }
 
       const conversaAndCallData = await createConversaAndCall(
@@ -596,15 +600,13 @@ exports.handler = async (context, event, callback) => {
         workerAttributes,
         taskAttributes.channelType,
         hubspotAxiosInstance,
+        logParams,
       );
 
       if (!conversaAndCallData.success) {
-        console.log(conversaAndCallData.message);
+        logger.error('Could not create Conversa and Call!', logParams, conversaAndCallData);
         return callback(conversaAndCallData.message);
       }
-
-      console.log('CALL ID - ', conversaAndCallData.callId);
-      console.log('CONVERSA ID - ', conversaAndCallData.conversaId);
 
       // Create relations
       const relationData = await createCallRelations(
@@ -615,69 +617,69 @@ exports.handler = async (context, event, callback) => {
         companyId,
         hubspotAxiosInstance,
         dealId,
+        logParams,
       );
 
       if (!relationData.success) {
-        console.log(relationData.message);
+        logger.error('Could not create relations!', logParams, relationData);
         return callback(relationData.message);
       }
 
-      console.log(`Historico salvo no hubspot com sucesso! - ${channelType}`);
+      logger.debug('Voice History saved to Hubspot successfully!', logParams);
+      response.setBody({
+        success: true,
+      });
+      return callback(null, response);
+      // eslint-disable-next-line no-else-return
+    } else {
+      // this means channelType === 'chat'
+      const messages = await getMessages(taskAttributes.conversationSid, createdTaskDate);
+
+      // get all messages of conversation and formatting it
+      const noteMessage = await getHistoryMessageAndFormat(taskAttributes.conversationSid, messages, taskAttributes);
+
+      // create Conversa(out custom object) and Note
+      const conversaAndNoteData = await createConversaAndNote(
+        hubspotId,
+        createdTaskDate,
+        updatedTaskDate,
+        taskAttributes,
+        workerAttributes,
+        taskAttributes.channelType,
+        noteMessage,
+        hubspotAxiosInstance,
+        logParams,
+      );
+
+      if (!conversaAndNoteData.success) {
+        logger.error('Could not create Conversa and Note!', logParams, conversaAndNoteData);
+        return callback(conversaAndNoteData.message);
+      }
+
+      // Create relations
+      const relationData = await createRelations(
+        conversaAndNoteData.conversaId,
+        conversaAndNoteData.noteId,
+        hubspotId,
+        taskAttributes.ticketId,
+        companyId,
+        hubspotAxiosInstance,
+        logParams,
+      );
+
+      if (!relationData.success) {
+        logger.error('Could not create Relations!', logParams, relationData);
+        return callback(relationData.message);
+      }
+
+      logger.debug('Chat History saved to Hubspot successfully!', logParams);
       response.setBody({
         success: true,
       });
       return callback(null, response);
     }
-
-    console.log('Chat');
-    const messages = await getMessages(taskAttributes.conversationSid, createdTaskDate);
-    console.log('Messages retrieved');
-
-    // get all messages of conversation and formatting it
-    const noteMessage = await getHistoryMessageAndFormat(taskAttributes.conversationSid, messages, taskAttributes);
-    console.log('Messages formatted');
-
-    // create Conversa(out custom object) and Note
-    const conversaAndNoteData = await createConversaAndNote(
-      hubspotId,
-      createdTaskDate,
-      updatedTaskDate,
-      taskAttributes,
-      workerAttributes,
-      taskAttributes.channelType,
-      noteMessage,
-      hubspotAxiosInstance,
-    );
-
-    if (!conversaAndNoteData.success) {
-      console.log(conversaAndNoteData.message);
-      return callback(conversaAndNoteData.message);
-    }
-    console.log('Note created');
-
-    // Create relations
-    const relationData = await createRelations(
-      conversaAndNoteData.conversaId,
-      conversaAndNoteData.noteId,
-      hubspotId,
-      taskAttributes.ticketId,
-      companyId,
-      hubspotAxiosInstance,
-    );
-
-    if (!relationData.success) {
-      console.log(relationData.message);
-      return callback(relationData.message);
-    }
-    console.log('Relations created');
-
-    console.log('Historico salvo no hubspot com sucesso!');
-    response.setBody({
-      success: true,
-    });
-    return callback(null, response);
   } catch (err) {
-    console.log(err);
-    return callback(null, err);
+    logger.error('Could not save history to Hubspot!', logParams, err);
+    return callback(err);
   }
 };
