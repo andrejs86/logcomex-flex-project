@@ -174,6 +174,8 @@ const TaskReasonModal = (props) => {
 
   const saveHistoryMethod = async (flex, task, workerAttributes, selectedDeal, setButtonDisabled, setIsOpenModal) => {
     try {
+      task.attributes.taskSid = task.sid;
+
       const responseSaveHistory = await HubspotService.SaveHistory(
         task.attributes,
         task.dateCreated,
