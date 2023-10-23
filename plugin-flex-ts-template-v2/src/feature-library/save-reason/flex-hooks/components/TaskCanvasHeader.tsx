@@ -26,13 +26,13 @@ export const componentHook = function addSaveTaskDetails(flex: typeof Flex, _man
     sortOrder: 1,
   };
   flex.TaskCanvasHeader.Content.add(
-    <Provider config={rollbarConfig}>
+    <Provider config={rollbarConfig} key="rollbar-save-task-details">
       <SaveTaskDetails key="save-task-details" />
     </Provider>,
     propsComponent,
   );
   flex.TaskCanvasHeader.Content.add(
-    <Provider config={rollbarConfig}>
+    <Provider config={rollbarConfig} key="rollbar-task-reason-modal">
       <TaskReasonModal key="task-reason-modal" flex={flex} />
     </Provider>,
   );
