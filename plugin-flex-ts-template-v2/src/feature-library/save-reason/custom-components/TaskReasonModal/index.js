@@ -162,13 +162,13 @@ const TaskReasonModal = (props) => {
         taskDetails: `${currentTopic} - ${selectedOption}\n\n${taskDetails}`,
         call_type: selectedType,
         call_outcome:
-          task.attributes.direction === 'inbound' ? 'a4c4c377-d246-4b32-a13b-75a56a4cd0ff' : selectedOutcome, // se é inbound, marcar como conectado
+          task.attributes.direction === 'inbound' ? 'f240bbac-87c9-4f6e-bf70-924b57d47db7' : selectedOutcome, // se é inbound, marcar como conectado
         newEmail,
       });
 
       await saveHistory(flex, task, selectedDeal, setIsOpenModal, setButtonDisabled);
     } catch (err) {
-      console.error(err);
+      window.Rollbar.error('Error onEndTask', task, err);
     }
   }
 
@@ -207,7 +207,7 @@ const TaskReasonModal = (props) => {
         }
       }
     } catch (err) {
-      console.error('could not save history to Hubspot', err);
+      window.Rollbar.error('could not save history to Hubspot', task, err);
       setButtonDisabled(false);
       setIsLoading(false);
       if (confirm('Contato não encontrado no Hubspot, não será vinculado. Deseja finalizar mesmo assim?')) {

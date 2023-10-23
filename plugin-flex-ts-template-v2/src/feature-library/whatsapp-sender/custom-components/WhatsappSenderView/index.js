@@ -107,13 +107,14 @@ const WhatsappSenderView = ({ manager }) => {
     })
       .then((data) => {
         if (data.success) {
-          console.log('Whatsapp message sent to', phone);
+          window.Rollbar.debug('Whatsapp message sent', data, phone);
           toaster.push({
             message: 'Mensagem enviada com sucesso! :D',
             variant: 'success',
             dismissAfter: 5000,
           });
         } else {
+          window.Rollbar.error('Could not send Whatsapp message', data, phone);
           toaster.push({
             message: 'Erro para enviar mensagem, verifique os dados digitados',
             variant: 'error',
@@ -121,8 +122,8 @@ const WhatsappSenderView = ({ manager }) => {
           });
         }
       })
-      .catch(() => {
-        console.error('Could not send Whatsapp message. Check serverless functions');
+      .catch((err) => {
+        window.Rollbar.error('Could not send Whatsapp message', phone, err);
         toaster.push({
           message: 'Erro para enviar mensagem, verifique os dados digitados',
           variant: 'error',
@@ -150,15 +151,15 @@ const WhatsappSenderView = ({ manager }) => {
       const messageFormatted = `${dateFormatted} - ${templateReplaced}`;
 
       try {
-        console.log('updating Hubspot');
-        HubspotService.UpdateInfo({
+        const hData = {
           newNumber: manager.workerClient.attributes.email,
           messagePropertyValue: true,
           search: phone,
           message: messageFormatted,
-        }).then(() => console.log('Hubspot updated'));
+        };
+        HubspotService.UpdateInfo(hData).then(() => console.log('Hubspot updated'));
       } catch (err) {
-        console.error('Could not update Hubspot', err);
+        window.Rollbar.error('Could not update Hubspot', hData, err);
       }
     }
   };

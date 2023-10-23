@@ -23,7 +23,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error searching client\r\n`, error);
+          console.error(`Error searching client`, url, email, error);
           reject(error);
         });
     });
@@ -46,7 +46,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error creating ticket\r\n`, error);
+          (window as any).Rollbar.error(`Error creating ticket`, url, taskAttributes, error);
           reject(error);
         });
     });
@@ -70,7 +70,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error getting deals\r\n`, error);
+          (window as any).Rollbar.error(`Error getting deals`, url, hs_object_id, associatedcompanyid, error);
           reject(error);
         });
     });
@@ -94,7 +94,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error getting new client information\r\n`, error);
+          (window as any).Rollbar.error(`Error getting new client information`, url, clientEmail, error);
           reject(error);
         });
     });
@@ -117,7 +117,12 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error saving history\r\n`, error);
+          (window as any).Rollbar.error(
+            `Error getting type and outcome`,
+            url,
+            config.getTypesAndOutcomesDocumentSid(),
+            error,
+          );
           reject(error);
         });
     });
@@ -156,7 +161,15 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error saving history\r\n`, error);
+          (window as any).Rollbar.error(
+            'Error saving history',
+            url,
+            taskAttributes,
+            workerAttributes,
+            channelType,
+            dealId,
+            error,
+          );
           reject(error);
         });
     });
@@ -165,6 +178,7 @@ class HubspotService extends ApiService {
   private getRecordingsData = async (recordingUrl: string) => {
     if (recordingUrl) {
       const result = await axios.get(`${recordingUrl}.json`).catch((err) => {
+        (window as any).Rollbar.error('Could not getRecordingsData', recordingUrl, err);
         return {
           success: false,
           message: err.message,

@@ -16,11 +16,10 @@ class WhatsappSenderService extends ApiService {
         body: this.buildBody(encodedParams),
       })
         .then((response) => {
-          console.log(response);
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error fetching WA templates\r\n`, error);
+          (window as any).Rollbar.error('Error fetching WA templates', url, error);
           reject(error);
         });
     });
@@ -45,7 +44,7 @@ class WhatsappSenderService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error searching client\r\n`, error);
+          (window as any).Rollbar.error('Error sending whatsapp message', url, message, error);
           reject(error);
         });
     });
