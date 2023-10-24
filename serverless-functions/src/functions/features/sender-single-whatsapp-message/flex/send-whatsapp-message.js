@@ -1,3 +1,5 @@
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
+
 exports.handler = async (context, event, callback) => {
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');

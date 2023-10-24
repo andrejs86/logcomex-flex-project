@@ -67,6 +67,7 @@ const TaskReasonModal = (props) => {
       const { deals, success } = await HubspotService.GetDeals(
         task?.attributes?.clientInformation?.hs_object_id,
         task?.attributes?.clientInformation?.associatedcompanyid,
+        task,
       );
 
       if (success) {

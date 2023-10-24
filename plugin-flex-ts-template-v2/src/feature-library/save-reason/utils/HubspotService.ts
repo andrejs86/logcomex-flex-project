@@ -52,12 +52,14 @@ class HubspotService extends ApiService {
     });
   };
 
-  GetDeals = async (hs_object_id: any, associatedcompanyid: any): Promise<any> => {
+  GetDeals = async (hs_object_id: any, associatedcompanyid: any, task: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
         hs_object_id,
         associatedcompanyid,
+        task,
+        source: 'Hubspot Service',
       };
 
       const url = `${this.serverlessProtocol}://${this.serverlessDomain}/features/hubspot-integration/flex/get-deals`;
@@ -70,7 +72,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          (window as any).Rollbar.error(`Error getting deals`, url, hs_object_id, associatedcompanyid, error);
+          (window as any).Rollbar.error(`Error getting deals`, { task, url, hs_object_id, associatedcompanyid, error });
           reject(error);
         });
     });

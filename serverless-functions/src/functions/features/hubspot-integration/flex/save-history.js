@@ -22,7 +22,7 @@ async function getMessages(conversationSid, createdTaskDate) {
       return messageDateCreated >= createdTaskDate - 600000;
     });
   } catch (err) {
-    logger.error('Could not get messages to save to Hubspot', conversationSid, createdTaskDate, err);
+    logger.error('Could not get messages to save to Hubspot', { conversationSid, createdTaskDate, err });
     return [];
   }
 }
@@ -68,7 +68,7 @@ async function getHistoryMessageAndFormat(conversationSid, messagesFiltered, tas
 
     noteMessage += '<b>Fim da Conversa</b>';
   } catch (err) {
-    logger.error('Could not get history message and format', conversationSid, taskAttributes, err);
+    logger.error('Could not get history message and format', { conversationSid, taskAttributes, err });
   } finally {
     return noteMessage;
   }
@@ -116,14 +116,14 @@ async function createConversaAndNote(
     // creating a note to store the messages
     const noteObject = await hubspotAxiosInstance.post(`/engagements/v1/engagements`, note);
 
-    logger.info('Conversa and Note successfully created.', logParams, conversaObject, noteObject);
+    logger.info('Conversa and Note successfully created.', { logParams, conversaObject, noteObject });
     return {
       success: true,
       conversaId: conversaObject.data.id,
       noteId: noteObject.data.engagement.id,
     };
   } catch (error) {
-    logger.error('could not create conversa and note', logParams, error);
+    logger.error('could not create conversa and note', { logParams, error });
     return { success: false, message: error.message };
   }
 }
@@ -477,7 +477,7 @@ async function createRelations(conversaId, noteId, hubspotId, ticketId, companyI
 
 async function searchCompany(value, hubspotAxiosInstance, logParams) {
   try {
-    const newValue = value.replace(/[A-Za-z\:\+]/g, '');
+    const newValue = value.trim().replace(/[A-Za-z\:\+]/g, '');
     const withNine = `${newValue.substring(0, 4)}9${newValue.substring(4)}`;
     let withoutNine = newValue.split('');
     withoutNine.splice(4, 1);
@@ -526,12 +526,12 @@ async function searchCompany(value, hubspotAxiosInstance, logParams) {
       }),
       properties: ['hs_object_id'],
     };
-
+    logger.debug('Searching Company', bodyRequest, value, logParams);
     const { data: companies } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/companies/search`, bodyRequest);
 
     return companies.results.length > 0 ? companies.results[0].id : false;
   } catch (error) {
-    logger.error('Could not find company!', logParams, error);
+    logger.warn('Could not find company!', logParams, error);
     return false;
   }
 }
@@ -568,7 +568,7 @@ exports.handler = async (context, event, callback) => {
   });
 
   if (!taskAttributes) {
-    logger.error('Task attributes is undefined!', logParams);
+    logger.error('Task attributes is undefined!', { logParams });
     response.setBody({
       success: false,
       message: 'Task attributes undefined',
@@ -582,12 +582,13 @@ exports.handler = async (context, event, callback) => {
   const companyId = await searchCompany(
     taskAttributes.direction === 'outbound' ? taskAttributes.outbound_to : taskAttributes.from,
     hubspotAxiosInstance,
+    logParams,
   );
 
   try {
     if (channelType === 'voice') {
       if (!taskAttributes.conversations && !taskAttributes.conversations?.segment_link) {
-        logger.error('recording link is unavailable!', logParams);
+        logger.error('recording link is unavailable!', { logParams });
         response.setBody({
           success: false,
           errorMessage: 'Link da gravação indisponível',
@@ -607,7 +608,7 @@ exports.handler = async (context, event, callback) => {
       );
 
       if (!conversaAndCallData.success) {
-        logger.error('Could not create Conversa and Call!', logParams, conversaAndCallData);
+        logger.error('Could not create Conversa and Call!', { logParams, conversaAndCallData });
         return callback(conversaAndCallData.message);
       }
 
@@ -624,11 +625,11 @@ exports.handler = async (context, event, callback) => {
       );
 
       if (!relationData.success) {
-        logger.error('Could not create relations!', logParams, relationData);
+        logger.error('Could not create relations!', { logParams, relationData });
         return callback(relationData.message);
       }
 
-      logger.info('Voice History saved to Hubspot successfully!', logParams);
+      logger.info('Voice History saved to Hubspot successfully!', { logParams });
       response.setBody({
         success: true,
       });
@@ -655,7 +656,7 @@ exports.handler = async (context, event, callback) => {
       );
 
       if (!conversaAndNoteData.success) {
-        logger.error('Could not create Conversa and Note!', logParams, conversaAndNoteData);
+        logger.error('Could not create Conversa and Note!', { logParams, conversaAndNoteData });
         return callback(conversaAndNoteData.message);
       }
 
@@ -671,18 +672,18 @@ exports.handler = async (context, event, callback) => {
       );
 
       if (!relationData.success) {
-        logger.error('Could not create Relations!', logParams, relationData);
+        logger.error('Could not create Relations!', { logParams, relationData });
         return callback(relationData.message);
       }
 
-      logger.info('Chat History saved to Hubspot successfully!', logParams);
+      logger.info('Chat History saved to Hubspot successfully!', { logParams });
       response.setBody({
         success: true,
       });
       return callback(null, response);
     }
   } catch (err) {
-    logger.error('Could not save history to Hubspot!', logParams, err);
+    logger.error('Could not save history to Hubspot!', { logParams, err });
     return callback(err);
   }
 };

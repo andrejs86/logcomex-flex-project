@@ -17,9 +17,15 @@ exports.handler = async (context, event, callback) => {
   });
 
   const { hs_object_id, associatedcompanyid } = event;
+  const { source, task } = event;
 
   if (!hs_object_id) {
-    logger.error('Could not get deals (no info provided)', event);
+    logger.error('Could not get deals (no info provided)', {
+      hs_object_id,
+      associatedcompanyid,
+      source,
+      task,
+    });
     response.setBody({
       success: false,
       message: `Contact id is undefined`,
