@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
+
 exports.handler = async (context, event, callback) => {
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');
@@ -17,6 +19,7 @@ exports.handler = async (context, event, callback) => {
   const { hs_object_id, associatedcompanyid } = event;
 
   if (!hs_object_id) {
+    logger.error('Could not get deals (no info provided)', event);
     response.setBody({
       success: false,
       message: `Contact id is undefined`,
@@ -53,8 +56,7 @@ exports.handler = async (context, event, callback) => {
 
         owner = result.data;
       } catch (err) {
-        console.log('Could not find owner!');
-        console.log(err);
+        logger.warn('Warning getting contact deals: owner not found!', contactDeal, event, err);
       }
 
       deals.contactDeals.push({
@@ -90,8 +92,7 @@ exports.handler = async (context, event, callback) => {
 
           owner = result.data;
         } catch (err) {
-          console.log('Could not find owner!');
-          console.log(err);
+          logger.warn('Warning getting company deals: owner not found!', companyDeal, event, err);
         }
 
         deals.companyDeals.push({
@@ -104,6 +105,7 @@ exports.handler = async (context, event, callback) => {
       }
     }
 
+    logger.info('Deals successfully retrieved', deals, event);
     response.setBody({
       success: true,
       deals,
@@ -111,7 +113,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (error) {
-    console.log(error);
+    logger.error('Could not retrieve deals', event, error);
     response.setBody({ success: false, error });
     return callback(response, null);
   }

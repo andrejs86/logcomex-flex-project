@@ -27,8 +27,9 @@ var _rollbarConfig = {
   rollbarJsUrl: 'https://cdn.rollbar.com/rollbarjs/refs/tags/v2.26.2/rollbar.min.js',
   captureUncaught: true,
   captureUnhandledRejections: true,
+  verbose: true,
   payload: {
-    environment: 'development',
+    environment: 'production',
     client: {
       javascript: {
         code_version: '1.0.0',
@@ -41,8 +42,6 @@ var _rollbarConfig = {
     },
   },
 };
-
-console.log('CORRECT FILE NOW!');
 
 // Rollbar Snippet
 !(function (r) {

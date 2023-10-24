@@ -15,7 +15,7 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: 'Client number is undefined',
     });
-    console.log('No client number was provided');
+    logger.error('Failed to send Whatsapp message. No client number was provided', event);
     return callback(null, response);
   }
 
@@ -24,7 +24,7 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: 'Template content is undefined',
     });
-    console.log('No template content was provided.');
+    logger.error('Failed to send Whatsapp message. No template content was provided', event);
     return callback(null, response);
   }
 
@@ -41,6 +41,7 @@ exports.handler = async (context, event, callback) => {
       body: templateContent,
     });
 
+    logger.info('Successfully sent whatsapp message', data, event);
     response.setBody({
       success: true,
       data,
@@ -48,6 +49,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (err) {
+    logger.error('Could not send whatsapp message', event, err);
     response.setBody({
       success: false,
       message: err.message,

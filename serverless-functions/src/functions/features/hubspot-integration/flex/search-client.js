@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
+
 const OBJECTS_URL = `/crm/v3/objects`;
 
 exports.handler = async (context, event, callback) => {
@@ -29,13 +31,13 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: `Client ${typeSearch || 'email'} is undefined`,
     });
-    console.log('typeSearch not specified');
+    logger.error('Cannot search client (typeSearch not specified)', value);
     return callback('typeSearch not specified', response);
   }
 
   if (typeSearch.includes('phone') && !regexNumber.test(value.replace(/[A-Za-z\:\+]/g, ''))) {
     response.setBody({ success: false, message: 'Value type is invalid' });
-    console.log('value not specified');
+    logger.error('Cannot search client (value not specified)', value);
     return callback('value not specified', response);
   }
 
@@ -115,7 +117,6 @@ exports.handler = async (context, event, callback) => {
       ],
     };
     const { data: contacts } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/contacts/search`, bodyRequest);
-    console.log('contacts found', contacts);
 
     if (contacts.results.length > 0) {
       let workerSid;
@@ -135,52 +136,59 @@ exports.handler = async (context, event, callback) => {
           );
           guardian = owner.email;
         } catch (err) {
-          console.log('Probably couldnt find guardian...');
-          console.log(err);
+          logger.error('Could not Search Client - Owner not found', event, err);
           guardian = undefined;
         }
 
         if (guardian) {
-          console.log('guardian found', guardian);
-          const workers = await client.taskrouter.v1.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).workers.list({
-            targetWorkersExpression: `email == "${guardian}"`,
-          });
+          logger.log('guardian found', guardian, event);
+          try {
+            const workers = await client.taskrouter.v1.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).workers.list({
+              targetWorkersExpression: `email == "${guardian}"`,
+            });
 
-          if (workers?.length > 0) {
-            const workerAttributes = JSON.parse(workers[0].attributes);
             // eslint-disable-next-line max-depth
-            if (workerAttributes?.routing?.skills?.length > 0) {
-              guardianSkill = workerAttributes?.routing?.skills[0];
-            } else {
-              console.log('no guardian skill was found');
-            }
+            if (workers?.length > 0) {
+              const workerAttributes = JSON.parse(workers[0].attributes);
+              // eslint-disable-next-line max-depth
+              if (workerAttributes?.routing?.skills?.length > 0) {
+                guardianSkill = workerAttributes?.routing?.skills[0];
+              } else {
+                logger.warn('no guardian skill was found', workerAttributes, event);
+              }
 
-            workerSid = workers[0].sid;
-            console.log('guardian worker was found', workerSid);
-          } else {
-            console.log('guardian is probably not a Flex user');
+              workerSid = workers[0].sid;
+              logger.debug('guardian worker was found', workerSid);
+            } else {
+              logger.warn('guardian is probably not a Flex user', guardian, event);
+            }
+          } catch (err) {
+            logger.error('Error finding guardian', guardian, event, err);
           }
         }
       } else {
-        console.log('no guardian for this contact');
+        logger.warn('No guardian for this contact', contacts, event);
       }
 
+      const responseData = {
+        ...contacts.results[0],
+        properties: {
+          ...contacts.results[0].properties,
+          guardian,
+          guardianSkill,
+          workerSid,
+        },
+      };
+      logger.info('Successfully retrieved client from Hubspot', responseData, event);
       response.setBody({
         success: true,
-        data: {
-          ...contacts.results[0],
-          properties: {
-            ...contacts.results[0].properties,
-            guardian,
-            guardianSkill,
-            workerSid,
-          },
-        },
+        data: responseData,
       });
 
       return callback(null, response);
     }
 
+    logger.warn('Client not found', bodyRequest, event);
     response.setBody({
       success: false,
       message: 'Client not found',
@@ -192,7 +200,7 @@ exports.handler = async (context, event, callback) => {
     });
     return callback(null, response);
   } catch (error) {
-    console.log(error);
+    logger.error('Could not search client', event, error);
     response.setBody({ success: false, error });
     return callback(error, response);
   }

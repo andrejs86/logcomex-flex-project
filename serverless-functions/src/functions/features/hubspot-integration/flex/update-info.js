@@ -1,65 +1,72 @@
 const axios = require('axios');
 
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
+
 const OBJECTS_URL = `/crm/v3/objects`;
 
 async function searchContact(value, hubspotAxiosInstance) {
-  const newValue = value.replace(/[A-Za-z\:\+]/g, '');
-  const withNine = `${newValue.substring(0, 4)}9${newValue.substring(4)}`;
-  let withoutNine = newValue.split('');
-  withoutNine.splice(4, 1);
-  withoutNine = withoutNine.join('');
+  try {
+    const newValue = value.replace(/[A-Za-z\:\+]/g, '');
+    const withNine = `${newValue.substring(0, 4)}9${newValue.substring(4)}`;
+    let withoutNine = newValue.split('');
+    withoutNine.splice(4, 1);
+    withoutNine = withoutNine.join('');
 
-  const filters = [
-    {
-      value: withoutNine,
-      propertyName: 'phone',
-      operator: 'CONTAINS_TOKEN',
-    },
-    {
-      value: withNine,
-      propertyName: 'mobilephone',
-      operator: 'CONTAINS_TOKEN',
-    },
-    {
-      value: withNine,
-      propertyName: 'phone',
-      operator: 'CONTAINS_TOKEN',
-    },
-    {
-      value: newValue,
-      propertyName: 'mobilephone',
-      operator: 'CONTAINS_TOKEN',
-    },
-    {
-      value: newValue,
-      propertyName: 'phone',
-      operator: 'CONTAINS_TOKEN',
-    },
-  ];
+    const filters = [
+      {
+        value: withoutNine,
+        propertyName: 'phone',
+        operator: 'CONTAINS_TOKEN',
+      },
+      {
+        value: withNine,
+        propertyName: 'mobilephone',
+        operator: 'CONTAINS_TOKEN',
+      },
+      {
+        value: withNine,
+        propertyName: 'phone',
+        operator: 'CONTAINS_TOKEN',
+      },
+      {
+        value: newValue,
+        propertyName: 'mobilephone',
+        operator: 'CONTAINS_TOKEN',
+      },
+      {
+        value: newValue,
+        propertyName: 'phone',
+        operator: 'CONTAINS_TOKEN',
+      },
+    ];
 
-  const bodyRequest = {
-    filterGroups: filters.map((filter) => {
-      return {
-        filters: [
-          {
-            value: filter.value,
-            propertyName: filter.propertyName,
-            operator: filter.operator,
-          },
-        ],
-      };
-    }),
-    properties: ['hs_object_id'],
-  };
+    const bodyRequest = {
+      filterGroups: filters.map((filter) => {
+        return {
+          filters: [
+            {
+              value: filter.value,
+              propertyName: filter.propertyName,
+              operator: filter.operator,
+            },
+          ],
+        };
+      }),
+      properties: ['hs_object_id'],
+    };
 
-  const { data: contacts } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/contacts/search`, bodyRequest);
-  if (contacts.results.length > 0) {
-    console.log('Contact found', contacts.results[0].properties.hs_object_id);
-    return contacts.results[0].properties.hs_object_id;
+    const { data: contacts } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/contacts/search`, bodyRequest);
+    if (contacts.results.length > 0) {
+      logger.debug('Contact found', contacts.results[0].properties.hs_object_id);
+      return contacts.results[0].properties.hs_object_id;
+    }
+
+    logger.warn('Contact not found!', filters, bodyRequest);
+    return false;
+  } catch (err) {
+    logger.error('Could not search contact', value, err);
+    return false;
   }
-
-  console.log('Contact NOT found');
-  return false;
 }
 
 async function editContactInfo(hubspot_id, number, hubspotAxiosInstance) {
@@ -70,11 +77,10 @@ async function editContactInfo(hubspot_id, number, hubspotAxiosInstance) {
         phone: formatedNumber,
       },
     });
-    console.log('Contact Info Updated on Hubspot');
+    logger.debug('Contact Info Updated on Hubspot');
     return true;
   } catch (error) {
-    console.log(error);
-    console.log('Contact Info NOT Updated on Hubspot');
+    logger.error('Could not update contact on Hubspot', hubspot_id, number, error);
     return false;
   }
 }
@@ -92,11 +98,10 @@ async function editSentMessageProperty(hubspot_id, newValue, message, hubspotAxi
     await hubspotAxiosInstance.patch(`${OBJECTS_URL}/contacts/${hubspot_id}`, {
       properties,
     });
-    console.log('Sent message property updated on Hubspot');
+    logger.debug('Sent message property updated on Hubspot');
     return true;
   } catch (error) {
-    console.log(error);
-    console.log('Sent message property NOT updated on Hubspot');
+    logger.error('Sent message property NOT updated on Hubspot', hubspot_id, newValue, message, error);
     return false;
   }
 }
@@ -125,6 +130,7 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: 'No information provided',
     });
+    logger.error('No information provided to update info on Hubspot', event);
     return callback(null, response);
   }
 
@@ -134,13 +140,13 @@ exports.handler = async (context, event, callback) => {
       : await editContactInfo(hubspot_id, newNumber, hubspotAxiosInstance);
 
     if (updateResponse) {
-      console.log('Phone number updated');
+      logger.debug('Phone number updated', hubspot_id, newNumber, event);
       response.setBody({
         success: true,
         message: 'PhoneNumber Updated',
       });
     } else {
-      console.log('Phone number NOT updated');
+      logger.error('Could not update Phone Number on Hubspot', hubspot_id, newNumber, event);
       response.setBody({
         success: false,
         message: 'PhoneNumber Not Updated',
@@ -149,7 +155,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (err) {
-    console.log(err);
+    logger.error('Could not update info', event, err);
     response.setBody({
       success: false,
       message: `Error ${err}`,

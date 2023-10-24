@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
+
 const OBJECTS_URL = `/crm/v3/objects`;
 
 exports.handler = async (context, event, callback) => {
@@ -28,6 +30,7 @@ exports.handler = async (context, event, callback) => {
   });
 
   if (!value) {
+    logger.error('Could not Search Client (no info provided)', event);
     response.setBody({
       success: false,
       message: 'no info provided',
@@ -118,6 +121,7 @@ exports.handler = async (context, event, callback) => {
     const { data: companies } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/companies/search`, companyBodyRequest);
 
     if (contacts.total === 0 && companies.total === 0) {
+      logger.warn('No contacts or companies were found', companyBodyRequest, bodyRequest, event);
       response.setBody({
         success: true,
         message: 'no contacts and companies found',
@@ -165,11 +169,12 @@ exports.handler = async (context, event, callback) => {
     const result = formattedInfo.filter((cc) => cc.phone || cc.mobilePhone);
     const companiesResult = formattedCompanies.filter((cc) => cc.phone);
 
+    logger.info('Search Client Modal was successful', companiesResult, result, event);
     response.setBody({ success: true, companies: companiesResult, result });
 
     return callback(null, response);
   } catch (error) {
-    console.log(error);
+    logger.error('Could not Search Client Modal', event, error);
     response.setBody({ success: false, error, result: [] });
     return callback(null, response);
   }

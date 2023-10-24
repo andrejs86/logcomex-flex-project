@@ -1,3 +1,5 @@
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
+
 exports.handler = async (context, event, callback) => {
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');
@@ -17,7 +19,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (e) {
-    console.log(e);
+    logger.error('Could not get types and outcomes from Sync', event, e);
     response.setBody({
       success: false,
       types: [],

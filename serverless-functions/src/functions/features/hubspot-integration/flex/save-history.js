@@ -1,12 +1,7 @@
 const axios = require('axios');
 const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
-const Rollbar = require('rollbar');
 
-const logger = new Rollbar({
-  accessToken: '751d928dc2dd4ce48b50202b18bd738a',
-  captureUncaught: true,
-  captureUnhandledRejections: true,
-});
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
 const OBJECTS_URL = `/crm/v3/objects`;
 const ASSOCIATIONS_URL = `/crm/v3/associations`;
@@ -15,59 +10,68 @@ let ASSOCIATIONS_URL_CONVERSAS = '';
 
 // get message history of conversation between client, bot and Agent
 async function getMessages(conversationSid, createdTaskDate) {
-  const messages = await client.chat.v2
-    .services(process.env.TWILIO_FLEX_CHAT_SERVICE_SID)
-    .channels(conversationSid)
-    .messages.list();
+  try {
+    const messages = await client.chat.v2
+      .services(process.env.TWILIO_FLEX_CHAT_SERVICE_SID)
+      .channels(conversationSid)
+      .messages.list();
 
-  // filtering just messages that be sent after the created date of the task
-  return messages.filter((message) => {
-    const messageDateCreated = new Date(message.dateCreated).getTime();
-    return messageDateCreated >= createdTaskDate - 600000;
-  });
+    // filtering just messages that be sent after the created date of the task
+    return messages.filter((message) => {
+      const messageDateCreated = new Date(message.dateCreated).getTime();
+      return messageDateCreated >= createdTaskDate - 600000;
+    });
+  } catch (err) {
+    logger.error('Could not get messages to save to Hubspot', conversationSid, createdTaskDate, err);
+    return [];
+  }
 }
 
 async function getHistoryMessageAndFormat(conversationSid, messagesFiltered, taskAttributes) {
   let noteMessage = `<b>Nova conversa Whatsapp</b><br><i>(ID da conversa: ${conversationSid}</i><br><br>`;
 
-  const firedMessage = taskAttributes.clientInformation?.ultima_mensagem_disparada;
+  try {
+    const firedMessage = taskAttributes.clientInformation?.ultima_mensagem_disparada;
 
-  if (
-    taskAttributes.clientInformation?.atendimento_ativo_por &&
-    taskAttributes.clientInformation?.atendimento_ativo_por !== ''
-  ) {
-    noteMessage += `<b>Mensagem Disparada</b><br>${firedMessage}<br><br>`;
-  }
-
-  messagesFiltered.forEach((message) => {
-    const from = message.from.includes('whatsapp')
-      ? '<b>Cliente</b>'
-      : message.from.startsWith('CH')
-      ? '<b>Bot</b>'
-      : `<b>Atendente</b> ${message.from}`;
-
-    let body = message.body ? message.body.split('\n').join('<br>') : '';
-
-    if (message.attributes) {
-      const attributesJSON = JSON.parse(message.attributes);
-
-      if (attributesJSON.media) {
-        body += `<a target="_blank" href="${attributesJSON.media}">Arquivo anexado</a>`;
-      }
+    if (
+      taskAttributes.clientInformation?.atendimento_ativo_por &&
+      taskAttributes.clientInformation?.atendimento_ativo_por !== ''
+    ) {
+      noteMessage += `<b>Mensagem Disparada</b><br>${firedMessage}<br><br>`;
     }
 
-    const hour = `<i>${new Date(message.dateCreated).toLocaleString(undefined, {
-      hour12: true,
-      timeStyle: 'medium',
-      dateStyle: 'short',
-    })}`;
+    messagesFiltered.forEach((message) => {
+      const from = message.from.includes('whatsapp')
+        ? '<b>Cliente</b>'
+        : message.from.startsWith('CH')
+        ? '<b>Bot</b>'
+        : `<b>Atendente</b> ${message.from}`;
 
-    noteMessage += `${from}<br>${body}<br>${hour}<br><br>`;
-  });
+      let body = message.body ? message.body.split('\n').join('<br>') : '';
 
-  noteMessage += '<b>Fim da Conversa</b>';
+      if (message.attributes) {
+        const attributesJSON = JSON.parse(message.attributes);
 
-  return noteMessage;
+        if (attributesJSON.media) {
+          body += `<a target="_blank" href="${attributesJSON.media}">Arquivo anexado</a>`;
+        }
+      }
+
+      const hour = `<i>${new Date(message.dateCreated).toLocaleString(undefined, {
+        hour12: true,
+        timeStyle: 'medium',
+        dateStyle: 'short',
+      })}`;
+
+      noteMessage += `${from}<br>${body}<br>${hour}<br><br>`;
+    });
+
+    noteMessage += '<b>Fim da Conversa</b>';
+  } catch (err) {
+    logger.error('Could not get history message and format', conversationSid, taskAttributes, err);
+  } finally {
+    return noteMessage;
+  }
 }
 
 // create conversa(custom object) and note
@@ -184,7 +188,7 @@ async function createConversaAndCall(
 
     const callObject = await hubspotAxiosInstance.post(`${OBJECTS_URL}/calls`, callProps);
 
-    logger.info('Call and Conversa successfully created.', logParams, callObject, conversaObject);
+    logger.info('Call and Conversa successfully created.', logParams, callObject, callProps, conversaObject);
 
     return {
       success: true,
@@ -463,10 +467,9 @@ async function createRelations(conversaId, noteId, hubspotId, ticketId, companyI
         ],
       });
     }
-    logger.debug('Relations successfully created.', logParams);
+    logger.info('Relations successfully created.', logParams);
     return { success: true };
   } catch (err) {
-    console.log(err.message);
     logger.error('Could not create relations', logParams, err);
     return { success: false, message: err.message };
   }
@@ -625,7 +628,7 @@ exports.handler = async (context, event, callback) => {
         return callback(relationData.message);
       }
 
-      logger.debug('Voice History saved to Hubspot successfully!', logParams);
+      logger.info('Voice History saved to Hubspot successfully!', logParams);
       response.setBody({
         success: true,
       });
@@ -672,7 +675,7 @@ exports.handler = async (context, event, callback) => {
         return callback(relationData.message);
       }
 
-      logger.debug('Chat History saved to Hubspot successfully!', logParams);
+      logger.info('Chat History saved to Hubspot successfully!', logParams);
       response.setBody({
         success: true,
       });
