@@ -119,11 +119,13 @@ const TaskReasonModal = (props) => {
 
       let taskDetails = 'Sem descrição de atendimento informada ou não foi possível salvar os dados';
       if (newEmail !== '') {
+        window.Rollbar.debug('Getting new Client information', { newEmail, task });
         const clientInformationReturn = await HubspotService.GetNewClientInformation(newEmail);
-
         if (clientInformationReturn) {
           task.attributes.clientInformation = clientInformationReturn;
+          window.Rollbar.debug('Got new Client information', { newEmail, task, clientInformationReturn });
         } else {
+          window.Rollbar.warn('Could not get new Client information', { newEmail, task, clientInformationReturn });
           setAlertContactNotFound(
             'Contato não encontrado no Hubspot, por favor informe o e-mail de um contato cadastrado.',
           );
@@ -169,7 +171,7 @@ const TaskReasonModal = (props) => {
 
       await saveHistory(flex, task, selectedDeal, setIsOpenModal, setButtonDisabled);
     } catch (err) {
-      window.Rollbar.error('Error onEndTask', task, err);
+      window.Rollbar.error('Error onEndTask', { task, err });
     }
   }
 
@@ -208,7 +210,7 @@ const TaskReasonModal = (props) => {
         }
       }
     } catch (err) {
-      window.Rollbar.error('could not save history to Hubspot', task, err);
+      window.Rollbar.error('could not save history to Hubspot', { task, err });
       setButtonDisabled(false);
       setIsLoading(false);
       if (confirm('Contato não encontrado no Hubspot, não será vinculado. Deseja finalizar mesmo assim?')) {
