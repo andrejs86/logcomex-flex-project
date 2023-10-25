@@ -136,7 +136,7 @@ exports.handler = async (context, event, callback) => {
           );
           guardian = owner.email;
         } catch (err) {
-          logger.error('Could not Search Client - Owner not found', event, err);
+          logger.error('Could not Search Client - Owner not found', { event, err });
           guardian = undefined;
         }
 
@@ -167,7 +167,7 @@ exports.handler = async (context, event, callback) => {
           }
         }
       } else {
-        logger.warn('No guardian for this contact', contacts, event);
+        logger.warn('No guardian for this contact', { contacts, event });
       }
 
       const responseData = {
@@ -179,7 +179,7 @@ exports.handler = async (context, event, callback) => {
           workerSid,
         },
       };
-      logger.info('Successfully retrieved client from Hubspot', responseData, event);
+      logger.info('Successfully retrieved client from Hubspot', { responseData, event });
       response.setBody({
         success: true,
         data: responseData,
@@ -188,7 +188,7 @@ exports.handler = async (context, event, callback) => {
       return callback(null, response);
     }
 
-    logger.warn('Client not found', bodyRequest, event);
+    logger.warn('Client not found', { bodyRequest, event });
     response.setBody({
       success: false,
       message: 'Client not found',
@@ -200,7 +200,7 @@ exports.handler = async (context, event, callback) => {
     });
     return callback(null, response);
   } catch (error) {
-    logger.error('Could not search client', event, error);
+    logger.error('Could not search client', { event, error });
     response.setBody({ success: false, error });
     return callback(error, response);
   }

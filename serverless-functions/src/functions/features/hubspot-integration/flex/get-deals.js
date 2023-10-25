@@ -2,6 +2,14 @@ const axios = require('axios');
 
 const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
+const tryParseJSON = (obj) => {
+  try {
+    return JSON.parse(obj);
+  } catch {
+    return obj;
+  }
+};
+
 exports.handler = async (context, event, callback) => {
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');
@@ -24,7 +32,7 @@ exports.handler = async (context, event, callback) => {
       hs_object_id,
       associatedcompanyid,
       source,
-      task,
+      task: tryParseJSON(task),
     });
     response.setBody({
       success: false,
