@@ -52,13 +52,28 @@ class HubspotService extends ApiService {
     });
   };
 
+  CircularReferenceJSONStringify = (obj: any) => {
+    let cache: any[] | null = [];
+    // eslint-disable-next-line func-names
+    const str: string = JSON.stringify(obj, function (key, value) {
+      if (typeof value === 'object' && value !== null) {
+        if (cache && cache.indexOf(value) !== -1) return;
+        if (cache) cache.push(value);
+      }
+      // eslint-disable-next-line consistent-return
+      return value;
+    });
+    cache = null;
+    return str;
+  };
+
   GetDeals = async (hs_object_id: any, associatedcompanyid: any, task: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
         hs_object_id,
         associatedcompanyid,
-        task: JSON.stringify(task),
+        task: this.CircularReferenceJSONStringify(task),
         source: 'Hubspot Service',
       };
 

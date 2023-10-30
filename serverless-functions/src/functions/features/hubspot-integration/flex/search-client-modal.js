@@ -5,7 +5,7 @@ const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'
 const OBJECTS_URL = `/crm/v3/objects`;
 
 exports.handler = async (context, event, callback) => {
-  console.log('Hubspot Search Client Modal: ', event?.value);
+  logger.debug('Hubspot Search Client Modal', { searchParam: event?.value });
 
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');
@@ -15,10 +15,8 @@ exports.handler = async (context, event, callback) => {
 
   const { value } = event;
 
-  if (context.HUBSPOT_API_KEY) {
-    console.log('Hubspot API Token is correctly set.');
-  } else {
-    console.log('Hubspot API Token is not set. Throwing...');
+  if (!context.HUBSPOT_API_KEY) {
+    logger.error('Hubspot API Token is not set. Throwing...', { event });
     throw new Error('Hubspot API token not set');
   }
 

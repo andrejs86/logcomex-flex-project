@@ -126,7 +126,11 @@ export const buildInviteParticipantAPIPayload = async (
   const { flexInteractionSid = null, flexInteractionChannelSid = null, conversationSid = null } = task.attributes;
 
   if (!flexInteractionSid || !flexInteractionChannelSid) {
-    (window as any).Rollbar.error('Transfer failed. Missing flexInteractionSid or flexInteractionChannelSid', { task });
+    (window as any).Rollbar.error('Transfer failed. Missing flexInteractionSid or flexInteractionChannelSid', {
+      taskSid,
+      targetSid,
+      removeInvitingAgent,
+    });
     return null;
   }
 
@@ -142,7 +146,11 @@ export const buildInviteParticipantAPIPayload = async (
     removeFlexInteractionParticipantSid = _getMyParticipantSid(participants) || '';
 
     if (!removeFlexInteractionParticipantSid) {
-      (window as any).Rollbar.error("Transfer failed. Didn't find flexInteractionPartipantSid", { task });
+      (window as any).Rollbar.error("Transfer failed. Didn't find flexInteractionPartipantSid", {
+        taskSid,
+        targetSid,
+        removeInvitingAgent,
+      });
       return null;
     }
   }
