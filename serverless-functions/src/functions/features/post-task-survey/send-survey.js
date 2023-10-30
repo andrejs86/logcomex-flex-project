@@ -6,6 +6,7 @@ const { sendOutboundMessageAndWaitForReply } = require(Runtime.getFunctions()[
 const { createOutboundCustomerConversation } = require(Runtime.getFunctions()[
   'features/post-task-survey/helpers/conversations_helper'
 ].path);
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
 exports.handler = async (context, event, callback) => {
   const client = context.getTwilioClient();
@@ -22,7 +23,7 @@ exports.handler = async (context, event, callback) => {
   } = event;
 
   try {
-    console.log('Sending Post Task Survey (chat)...', taskSid, conversationSid);
+    logger.debug('Sending Post Task Survey (chat)...', { taskSid, conversationSid, whatsappNumber });
 
     const task = await client.taskrouter.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks(taskSid).fetch();
     const taskAttributes = JSON.parse(task.attributes);
@@ -39,22 +40,18 @@ exports.handler = async (context, event, callback) => {
     };
 
     await sendOutboundMessage(context, outboundMessageParams);
-    console.log('Survey Message sent');
+    logger.debug('Survey Message sent', { task, conversationSid, whatsappNumber });
 
     const reservations = await client.taskrouter.v1
       .workspaces(TWILIO_FLEX_WORKSPACE_SID)
       .tasks(taskSid)
       .reservations.list();
 
-    console.log('got reservations');
-
     const reservationStatus = ['completed', 'accepted', 'wrapping'];
 
     const acceptedReservation = reservations.find((reservation) =>
       reservationStatus.includes(reservation.reservationStatus),
     );
-
-    console.log('got accepted reservation', acceptedReservation.sid);
 
     const originalAttributes = JSON.parse(task.attributes);
 
@@ -88,18 +85,17 @@ exports.handler = async (context, event, callback) => {
       taskChannel: 'survey',
       timeout: 1800,
     });
-    console.log('Survey Task Created', taskSurvey.sid);
+
+    logger.debug('Survey Task successfully created', { task, taskSurvey, conversationSid, whatsappNumber });
 
     const response = responseHelper.defaultResponse();
     response.setBody({
       message: 'Survey successfully sent',
       surveyTask: taskSurvey.sid,
     });
-    console.log('successfully sent survey');
     return callback(null, response);
   } catch (err) {
-    console.log('could not send survey');
-    console.log(err);
+    logger.error('Could not send survey.', { err, taskSid, conversationSid, whatsappNumber });
     const response = responseHelper.genericErrorResponse(err.message);
     return callback(response);
   }

@@ -188,7 +188,7 @@ async function createConversaAndCall(
 
     const callObject = await hubspotAxiosInstance.post(`${OBJECTS_URL}/calls`, callProps);
 
-    logger.info('Call and Conversa successfully created.', logParams, callObject, callProps, conversaObject);
+    logger.info('Call and Conversa successfully created.', { logParams, callObject, callProps, conversaObject });
 
     return {
       success: true,
@@ -196,7 +196,7 @@ async function createConversaAndCall(
       callId: callObject.data.id,
     };
   } catch (error) {
-    logger.error('Could not create conversa or call', logParams, error);
+    logger.error('Could not create conversa or call', { logParams, error });
     return { success: false, message: error.message };
   }
 }
@@ -326,10 +326,10 @@ async function createCallRelations(
         ],
       });
     }
-    logger.debug('Call relations successfully created.', logParams);
+    logger.debug('Call relations successfully created.', { logParams });
     return { success: true };
   } catch (err) {
-    logger.error('Could not create call relations', logParams, err);
+    logger.error('Could not create call relations', { logParams, err });
     return { success: false, message: err.message };
   }
 }
@@ -467,10 +467,10 @@ async function createRelations(conversaId, noteId, hubspotId, ticketId, companyI
         ],
       });
     }
-    logger.info('Relations successfully created.', logParams);
+    logger.info('Relations successfully created.', { logParams });
     return { success: true };
   } catch (err) {
-    logger.error('Could not create relations', logParams, err);
+    logger.error('Could not create relations', { logParams, err });
     return { success: false, message: err.message };
   }
 }
@@ -526,12 +526,12 @@ async function searchCompany(value, hubspotAxiosInstance, logParams) {
       }),
       properties: ['hs_object_id'],
     };
-    logger.debug('Searching Company', bodyRequest, value, logParams);
+    logger.debug('Searching Company', { bodyRequest, value, logParams });
     const { data: companies } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/companies/search`, bodyRequest);
 
     return companies.results.length > 0 ? companies.results[0].id : false;
   } catch (error) {
-    logger.warn('Could not find company!', logParams, error);
+    logger.warn('Could not find company!', { logParams, error });
     return false;
   }
 }

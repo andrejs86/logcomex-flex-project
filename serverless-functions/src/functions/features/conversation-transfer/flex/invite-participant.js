@@ -1,6 +1,7 @@
 const { prepareFlexFunction } = require(Runtime.getFunctions()['common/helpers/function-helper'].path);
 const ConversationsOperations = require(Runtime.getFunctions()['common/twilio-wrappers/conversations'].path);
 const InteractionsOperations = require(Runtime.getFunctions()['common/twilio-wrappers/interactions'].path);
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
 const requiredParameters = [
   {
@@ -72,6 +73,7 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
       data: null,
       message: 'TWILIO_FLEX_WORKSPACE_SID and TWILIO_FLEX_CHAT_TRANSFER_WORKFLOW_SID required enviroment variables',
     });
+    logger.error('TWILIO_FLEX_WORKSPACE_SID and TWILIO_FLEX_CHAT_TRANSFER_WORKFLOW_SID required enviroment variables');
     return callback(null, response);
   }
 
@@ -113,6 +115,7 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
 
     // if this failed bail out so we don't remove the agent from the conversation and no one else joins
     if (!success) {
+      logger.error('Failed to create Participant Invite', { errorMessage: message, participantCreateInviteParams });
       return handleError(message);
     }
 
@@ -122,6 +125,12 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
         interactionSid: flexInteractionSid,
         channelSid: flexInteractionChannelSid,
         participantSid: removeFlexInteractionParticipantSid,
+        context,
+      });
+      logger.debug('Flex Interaction Participant Sid removed', {
+        flexInteractionSid,
+        flexInteractionChannelSid,
+        removeFlexInteractionParticipantSid,
         context,
       });
     } else {
@@ -149,6 +158,7 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
         }),
         context,
       });
+      logger.debug('Conversation Attributes updated', { conversation });
     }
 
     response.setStatusCode(201);
@@ -158,8 +168,10 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
       participantInviteSid: participantInvite.sid,
       invitesTaskSid: participantInvite.routing.properties.sid,
     });
+    logger.debug('Successfully invited participant', { event, participantInvite });
     return callback(null, response);
   } catch (error) {
+    logger.error('Could not invite participant!', { error, event });
     return handleError(error);
   }
 });

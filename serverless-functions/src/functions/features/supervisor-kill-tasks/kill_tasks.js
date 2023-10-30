@@ -1,20 +1,20 @@
-exports.handler = async (context, event, callback) => {
-  try {
-    const client = context.getTwilioClient();
-    const { task_sid, conversation_sid } = event;
-    console.log('Trying to kill task -----> ', task_sid);
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
+exports.handler = async (context, event, callback) => {
+  const client = context.getTwilioClient();
+  const { task_sid, conversation_sid } = event;
+
+  try {
     const task = await client.taskrouter.v1.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).tasks(task_sid).fetch();
 
     const killResult = await client.taskrouter.v1.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).tasks(task.sid).update({
       assignmentStatus: 'completed',
       reason: 'task killed',
     });
-    console.log('Task Successfully Killed -------> ', killResult.sid);
+    logger.debug('Task Successfully Killed', { killResult, task_sid, conversation_sid });
 
-    console.log('Trying to kill Conversation -----> ', conversation_sid);
     const killConvoResult = await client.conversations.v1.conversations(conversation_sid).update({ state: 'closed' });
-    console.log('Conversation Successfully Killed -------> ', killConvoResult.sid);
+    logger.debug('Conversation Successfully Killed', { killConvoResult, task_sid, conversation_sid });
 
     const twilioResponse = new Twilio.Response();
     const headers = {
@@ -28,7 +28,7 @@ exports.handler = async (context, event, callback) => {
     twilioResponse.setBody({ success: true });
     return callback(null, twilioResponse);
   } catch (err) {
-    console.log(err);
+    logger.error('could not kill task', { err, task_sid, conversation_sid });
     return callback(err, null);
   }
 };

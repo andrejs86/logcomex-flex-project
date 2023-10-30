@@ -15,11 +15,12 @@ exports.handler = async (context, event, callback) => {
       .documents(event.TypesAndOutcomesDocumentSid)
       .fetch();
 
+    logger.debug('Successfully retrieved outcomes from Sync', { data });
     response.setBody({ success: true, outcomes: data.outcomes, types: data.types });
 
     return callback(null, response);
   } catch (e) {
-    logger.error('Could not get types and outcomes from Sync', event, e);
+    logger.error('Could not get types and outcomes from Sync', { event, e });
     response.setBody({
       success: false,
       types: [],

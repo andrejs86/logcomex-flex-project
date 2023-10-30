@@ -1,6 +1,7 @@
 const { prepareFlexFunction } = require(Runtime.getFunctions()['common/helpers/function-helper'].path);
 const ConversationsOperations = require(Runtime.getFunctions()['common/twilio-wrappers/conversations'].path);
 const InteractionsOperations = require(Runtime.getFunctions()['common/twilio-wrappers/interactions'].path);
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
 const requiredParameters = [
   {
@@ -28,6 +29,7 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
       participantSid: flexInteractionParticipantSid,
       context,
     });
+    logger.debug('Participant updated successfully.', { event, context });
 
     // After leaving, check how many participants are left in the conversation.
     // Why? There is a race condition where the agents may both leave at the same time, so both
@@ -46,6 +48,7 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
         conversationSid,
         context,
       });
+      logger.debug('Conversation with 1 (or less) participants', { event, conversationResult });
 
       let invites = {};
 
@@ -58,6 +61,7 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
       }
 
       if (Object.keys(invites).length < 1) {
+        logger.debug('There are no invites, conversation will be closed.', { event, conversationResult });
         // If the customer is alone, and no invites are pending, close it out.
         await InteractionsOperations.channelUpdate({
           status: 'closed',
@@ -65,6 +69,9 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
           channelSid: flexInteractionChannelSid,
           context,
         });
+        logger.debug('Conversation closed.', { event, conversationResult });
+      } else {
+        logger.debug('There are invites, conversation will not be closed.', { event, conversationResult });
       }
     }
 
@@ -72,8 +79,11 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
     response.setBody({
       success: true,
     });
+
+    logger.debug('Successfully removed participant.', { event });
     return callback(null, response);
   } catch (error) {
+    logger.error('Could not remove participant', { error, event, context });
     return handleError(error);
   }
 });

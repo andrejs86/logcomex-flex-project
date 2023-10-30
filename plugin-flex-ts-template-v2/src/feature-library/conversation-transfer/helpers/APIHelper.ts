@@ -51,7 +51,7 @@ const _queueNameFromSid = async (transferTargetSid: string) => {
   try {
     queues = await TaskService.getQueues();
   } catch (error) {
-    console.error('conversation-transfer: Unable to get queues', error);
+    (window as any).Rollbar.error('conversation-transfer: Unable to get queues', { error });
   }
 
   const queueResult = queues
@@ -116,7 +116,7 @@ export const buildInviteParticipantAPIPayload = async (
   if (transferTargetSid.startsWith('WQ')) {
     transferQueueName = await _queueNameFromSid(transferTargetSid);
     if (!transferQueueName) {
-      console.error('Transfer failed. queueNameFromSid failed for', transferTargetSid);
+      (window as any).Rollbar.error('Transfer failed. queueNameFromSid failed for', { transferTargetSid });
       return null;
     }
   } else {
@@ -126,7 +126,7 @@ export const buildInviteParticipantAPIPayload = async (
   const { flexInteractionSid = null, flexInteractionChannelSid = null, conversationSid = null } = task.attributes;
 
   if (!flexInteractionSid || !flexInteractionChannelSid) {
-    console.error('Transfer failed. Missing flexInteractionSid or flexInteractionChannelSid', task.sid);
+    (window as any).Rollbar.error('Transfer failed. Missing flexInteractionSid or flexInteractionChannelSid', { task });
     return null;
   }
 
@@ -142,7 +142,7 @@ export const buildInviteParticipantAPIPayload = async (
     removeFlexInteractionParticipantSid = _getMyParticipantSid(participants) || '';
 
     if (!removeFlexInteractionParticipantSid) {
-      console.error("Transfer failed. Didn't find flexInteractionPartipantSid", task.sid);
+      (window as any).Rollbar.error("Transfer failed. Didn't find flexInteractionPartipantSid", { task });
       return null;
     }
   }

@@ -28,7 +28,7 @@ exports.handler = async (context, event, callback) => {
   const { source, task } = event;
 
   if (!hs_object_id) {
-    logger.error('Could not get deals (no info provided)', {
+    logger.debug('Could not get deals (unknown client)', {
       hs_object_id,
       associatedcompanyid,
       source,
@@ -70,7 +70,7 @@ exports.handler = async (context, event, callback) => {
 
         owner = result.data;
       } catch (err) {
-        logger.warn('Warning getting contact deals: owner not found!', contactDeal, event, err);
+        logger.warn('Warning getting contact deals: owner not found!', { contactDeal, event, err });
       }
 
       deals.contactDeals.push({
@@ -106,7 +106,7 @@ exports.handler = async (context, event, callback) => {
 
           owner = result.data;
         } catch (err) {
-          logger.warn('Warning getting company deals: owner not found!', companyDeal, event, err);
+          logger.warn('Warning getting company deals: owner not found!', { companyDeal, event, err });
         }
 
         deals.companyDeals.push({
@@ -119,7 +119,7 @@ exports.handler = async (context, event, callback) => {
       }
     }
 
-    logger.info('Deals successfully retrieved', deals, event);
+    logger.info('Deals successfully retrieved', { deals, event });
     response.setBody({
       success: true,
       deals,
@@ -127,7 +127,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (error) {
-    logger.error('Could not retrieve deals', event, error);
+    logger.error('Could not retrieve deals', { event, error });
     response.setBody({ success: false, error });
     return callback(response, null);
   }

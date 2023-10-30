@@ -5,7 +5,7 @@ import { FlexComponent } from '../../../../types/feature-loader';
 import { isMenuEnabled } from '../../config';
 
 export const componentName = FlexComponent.MainHeader;
-export const componentHook = function addDeviceManagerToMainHeader(flex: typeof Flex) {
+export const componentHook = function addLanguageSelectorToMainHeader(flex: typeof Flex) {
   if (!isMenuEnabled()) {
     return;
   }

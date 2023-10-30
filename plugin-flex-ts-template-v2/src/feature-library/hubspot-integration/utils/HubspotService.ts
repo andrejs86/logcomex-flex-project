@@ -1,6 +1,5 @@
 import ApiService from '../../../utils/serverless/ApiService';
 import { EncodedParams } from '../../../types/serverless';
-import * as config from '../config';
 
 class HubspotService extends ApiService {
   searchClient = async (searchValue: string): Promise<any> => {
@@ -20,7 +19,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error searching client\r\n`, error);
+          (window as any).Rollbar.error(`Error searching client`, { searchValue, error });
           reject(error);
         });
     });

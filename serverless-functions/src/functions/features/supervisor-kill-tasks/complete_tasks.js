@@ -1,3 +1,5 @@
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
+
 function getDifferenceData(updatedTime) {
   const nowDate = new Date();
   const startedDate = new Date(updatedTime);
@@ -31,15 +33,14 @@ exports.handler = async (context, event, callback) => {
         await client.taskrouter.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).tasks(task.sid).update({
           assignmentStatus: `completed`,
         });
-        console.log(`Finalizou task, SID: ${task.sid}`);
+        logger.debug('Task Completed', { task });
       }
     }
 
     twilioResponse.setBody('success');
     return callback(null, twilioResponse);
   } catch (error) {
-    console.log(error);
-    console.log('could not complete task');
+    logger.error('could not complete task', { error, event });
     return callback(error, error.message);
   }
 };

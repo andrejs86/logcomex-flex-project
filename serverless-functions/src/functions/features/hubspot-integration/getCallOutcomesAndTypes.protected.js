@@ -7,7 +7,7 @@ async function getTypes(hubspotAxiosInstance) {
     const { data } = await hubspotAxiosInstance.get(`/crm/v3/properties/call/hs_activity_type`);
     return data.options;
   } catch (err) {
-    logger.error('Could not get Types', err);
+    logger.error('Could not get Types', { err });
     return undefined;
   }
 }
@@ -17,7 +17,7 @@ async function getOutcomes(hubspotAxiosInstance) {
     const outcomes = await hubspotAxiosInstance.get(`/calling/v1/dispositions`);
     return outcomes.data;
   } catch (err) {
-    logger.error('Could not get outcomes', err);
+    logger.error('Could not get outcomes', { err });
     return undefined;
   }
 }
@@ -56,7 +56,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (e) {
-    logger.error('Could not get Types and Outcomes', event, e);
+    logger.error('Could not get Types and Outcomes', { event, e });
     response.setBody({
       success: false,
       types: [],

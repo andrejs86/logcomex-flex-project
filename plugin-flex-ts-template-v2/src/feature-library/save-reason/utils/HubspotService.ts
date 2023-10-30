@@ -23,7 +23,7 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          console.error(`Error searching client`, { url, email, error });
+          (window as any).Rollbar.error(`Error searching client`, { url, email, error });
           reject(error);
         });
     });
@@ -58,7 +58,7 @@ class HubspotService extends ApiService {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
         hs_object_id,
         associatedcompanyid,
-        task,
+        task: JSON.stringify(task),
         source: 'Hubspot Service',
       };
 

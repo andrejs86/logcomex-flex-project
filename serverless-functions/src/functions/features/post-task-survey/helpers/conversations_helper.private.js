@@ -1,6 +1,7 @@
 const { taskDetailsFromConversationSid, agentNameFromIdentity } = require(Runtime.getFunctions()[
   'features/post-task-survey/helpers/taskrouter_helper'
 ].path);
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
 const parseConversationSid = (str) => {
   const regex = /\bCH[a-zA-Z0-9]{32}\b/;
@@ -24,7 +25,7 @@ const agentIdentityFromConversation = async (client, conversationSid) => {
 
 exports.createOutboundCustomerConversation = async (client, workspaceSid, to, from) => {
   const conversation = await client.conversations.v1.conversations.create();
-  console.log('Created conversation', conversation.sid);
+  logger.debug('Created outbound conversation', { conversation, to, from });
 
   // 'to' is the customer number
   // 'from' is the Twilio number
@@ -43,7 +44,7 @@ exports.createOutboundCustomerConversation = async (client, workspaceSid, to, fr
 
       // delete the conversation that we created but couldn't use as participant add failed
       await client.conversations.v1.conversations(conversation.sid).remove();
-      console.log('Deleted conversation', conversation.sid);
+      logger.debug('Deleted conversation', { conversation, from, to });
 
       if (!existingConversationSid) return {};
 

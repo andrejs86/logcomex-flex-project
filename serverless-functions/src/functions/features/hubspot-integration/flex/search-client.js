@@ -31,13 +31,13 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: `Client ${typeSearch || 'email'} is undefined`,
     });
-    logger.error('Cannot search client (typeSearch not specified)', value);
+    logger.error('Cannot search client (typeSearch not specified)', { value, typeSearch });
     return callback('typeSearch not specified', response);
   }
 
   if (typeSearch.includes('phone') && !regexNumber.test(value.replace(/[A-Za-z\:\+]/g, ''))) {
     response.setBody({ success: false, message: 'Value type is invalid' });
-    logger.error('Cannot search client (value not specified)', value);
+    logger.error('Cannot search client (value not specified)', { value, typeSearch });
     return callback('value not specified', response);
   }
 
@@ -141,7 +141,7 @@ exports.handler = async (context, event, callback) => {
         }
 
         if (guardian) {
-          logger.log('guardian found', guardian, event);
+          logger.log('guardian found', { guardian, event });
           try {
             const workers = await client.taskrouter.v1.workspaces(context.TWILIO_FLEX_WORKSPACE_SID).workers.list({
               targetWorkersExpression: `email == "${guardian}"`,
@@ -160,10 +160,10 @@ exports.handler = async (context, event, callback) => {
               workerSid = workers[0].sid;
               logger.debug('guardian worker was found', workerSid);
             } else {
-              logger.warn('guardian is probably not a Flex user', guardian, event);
+              logger.warn('guardian is probably not a Flex user', { guardian, event });
             }
           } catch (err) {
-            logger.error('Error finding guardian', guardian, event, err);
+            logger.error('Error finding guardian', { guardian, event, err });
           }
         }
       } else {

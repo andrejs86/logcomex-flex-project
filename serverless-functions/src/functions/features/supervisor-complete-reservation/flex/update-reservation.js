@@ -2,6 +2,7 @@ const { prepareFlexFunction, extractStandardResponse } = require(Runtime.getFunc
   'common/helpers/function-helper'
 ].path);
 const TaskOperations = require(Runtime.getFunctions()['common/twilio-wrappers/taskrouter'].path);
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
 const requiredParameters = [
   { key: 'taskSid', purpose: 'sid of the task' },
@@ -10,6 +11,8 @@ const requiredParameters = [
 ];
 
 exports.handler = prepareFlexFunction(requiredParameters, async (context, event, callback, response, handleError) => {
+  const { taskSid, reservationSid, status: taskStatus } = event;
+
   try {
     /** on the surface this function only adds a redundant laye
      * around updateReservation but it provides a convenient hook
@@ -25,9 +28,6 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
      * reservations and we risk overwriting an outcome of a subsequent transfer
      * reservation.
      **/
-
-    const { taskSid, reservationSid, status: taskStatus } = event;
-
     const result = await TaskOperations.updateReservation({
       context,
       taskSid,
@@ -39,8 +39,10 @@ exports.handler = prepareFlexFunction(requiredParameters, async (context, event,
 
     response.setStatusCode(status);
     response.setBody({ reservation, ...extractStandardResponse(result) });
+    logger.info('Reservation updated', { taskSid, reservationSid, taskStatus });
     return callback(null, response);
   } catch (error) {
+    logger.error('Could not update reservation', { error, taskSid, reservationSid, taskStatus });
     return handleError(error);
   }
 });

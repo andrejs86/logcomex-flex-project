@@ -1,5 +1,6 @@
 const TwilioHelper = require(Runtime.getFunctions()['features/post-task-survey/helpers/twilio-response']
   .path).TwilioHelper;
+const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
 exports.handler = async (context, event, callback) => {
   const client = context.getTwilioClient();
@@ -11,7 +12,7 @@ exports.handler = async (context, event, callback) => {
     if (conversationSid) {
       client.conversations.v1.conversations(conversationSid).update({ state: 'Closed' });
     } else {
-      console.log('Conversation SID not provided!');
+      logger.warn('Conversation SID not provided!', { csatMeasure, clientNumber, conversationSid });
     }
 
     const tasks = await client.taskrouter.v1.workspaces(TWILIO_FLEX_WORKSPACE_SID).tasks.list({
@@ -50,18 +51,19 @@ exports.handler = async (context, event, callback) => {
           });
         });
 
-      console.log('task attributes updated');
+      logger.debug('task attributes updated', { task: tasks[0], csatMeasure, clientNumber, conversationSid });
     }
 
     if (tasks.length === 0) {
-      console.log('task not found!');
+      logger.warn('task not found!', { csatMeasure, clientNumber, conversationSid });
     }
 
     const response = responseHelper.defaultResponse();
+    logger.info('Survey successfully finalized', { task: tasks[0], csatMeasure, clientNumber, conversationSid });
     response.setBody({ message: 'Survey successfully finalized' });
     return callback(null, response);
   } catch (err) {
-    console.log(err);
+    logger.error('Could not close survey', { csatMeasure, clientNumber, conversationSid, err });
     const response = responseHelper.defaultResponse();
     response.setBody({ message: 'Failed to save CSAT results to task attribute' });
     return callback(response);

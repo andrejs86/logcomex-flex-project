@@ -7,10 +7,10 @@ export const actionName = FlexAction.AcceptTask;
 
 export const actionHook = function sendWelcomeMessage(flex: typeof Flex, manager: Flex.Manager) {
   flex.Actions.addListener(`${actionEvent}${actionName}`, (payload: any) => {
-    const conversationSid = payload.task.attributes?.conversationSid ?? payload.task.attributes?.channelSid;
-    console.log(`sending welcome message to ${conversationSid}`, payload);
-
     if (payload.task?.attributes?.subject === 'comes-from-template') return;
+    if (payload.task?.channelType === 'voice') return;
+
+    const conversationSid = payload.task.attributes?.conversationSid ?? payload.task.attributes?.channelSid;
 
     setTimeout(() => {
       flex.Actions.invokeAction('SendMessage', {

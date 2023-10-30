@@ -57,14 +57,14 @@ async function searchContact(value, hubspotAxiosInstance) {
 
     const { data: contacts } = await hubspotAxiosInstance.post(`${OBJECTS_URL}/contacts/search`, bodyRequest);
     if (contacts.results.length > 0) {
-      logger.debug('Contact found', contacts.results[0].properties.hs_object_id);
+      logger.debug('Contact found', { hs_object_id: contacts.results[0].properties.hs_object_id });
       return contacts.results[0].properties.hs_object_id;
     }
 
-    logger.warn('Contact not found!', filters, bodyRequest);
+    logger.warn('Contact not found!', { filters, bodyRequest });
     return false;
   } catch (err) {
-    logger.error('Could not search contact', value, err);
+    logger.error('Could not search contact', { value, err });
     return false;
   }
 }
@@ -77,10 +77,10 @@ async function editContactInfo(hubspot_id, number, hubspotAxiosInstance) {
         phone: formatedNumber,
       },
     });
-    logger.debug('Contact Info Updated on Hubspot');
+    logger.debug('Contact Info Updated on Hubspot', { hubspot_id, number });
     return true;
   } catch (error) {
-    logger.error('Could not update contact on Hubspot', hubspot_id, number, error);
+    logger.error('Could not update contact on Hubspot', { hubspot_id, number, error });
     return false;
   }
 }
@@ -98,10 +98,10 @@ async function editSentMessageProperty(hubspot_id, newValue, message, hubspotAxi
     await hubspotAxiosInstance.patch(`${OBJECTS_URL}/contacts/${hubspot_id}`, {
       properties,
     });
-    logger.debug('Sent message property updated on Hubspot');
+    logger.debug('Sent message property updated on Hubspot', { hubspot_id, properties });
     return true;
   } catch (error) {
-    logger.error('Sent message property NOT updated on Hubspot', hubspot_id, newValue, message, error);
+    logger.error('Sent message property NOT updated on Hubspot', { hubspot_id, newValue, message, error });
     return false;
   }
 }
@@ -130,7 +130,7 @@ exports.handler = async (context, event, callback) => {
       success: false,
       message: 'No information provided',
     });
-    logger.error('No information provided to update info on Hubspot', event);
+    logger.error('No information provided to update info on Hubspot', { event });
     return callback(null, response);
   }
 
@@ -140,13 +140,13 @@ exports.handler = async (context, event, callback) => {
       : await editContactInfo(hubspot_id, newNumber, hubspotAxiosInstance);
 
     if (updateResponse) {
-      logger.debug('Phone number updated', hubspot_id, newNumber, event);
+      logger.debug('Phone number updated', { hubspot_id, newNumber, event });
       response.setBody({
         success: true,
         message: 'PhoneNumber Updated',
       });
     } else {
-      logger.error('Could not update Phone Number on Hubspot', hubspot_id, newNumber, event);
+      logger.error('Could not update Phone Number on Hubspot', { hubspot_id, newNumber, event });
       response.setBody({
         success: false,
         message: 'PhoneNumber Not Updated',
@@ -155,7 +155,7 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (err) {
-    logger.error('Could not update info', event, err);
+    logger.error('Could not update info', { event, err });
     response.setBody({
       success: false,
       message: `Error ${err}`,
