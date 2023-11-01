@@ -2,14 +2,6 @@ const axios = require('axios');
 
 const { logger } = require(Runtime.getFunctions()['common/helpers/logger-helper'].path);
 
-const tryParseJSON = (obj) => {
-  try {
-    return JSON.parse(obj);
-  } catch {
-    return obj;
-  }
-};
-
 exports.handler = async (context, event, callback) => {
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');
@@ -25,14 +17,16 @@ exports.handler = async (context, event, callback) => {
   });
 
   const { hs_object_id, associatedcompanyid } = event;
-  const { source, task } = event;
+  const { source, taskSid, reservationSid, taskAttributes } = event;
 
   if (!hs_object_id) {
     logger.debug('Could not get deals (unknown client)', {
       hs_object_id,
       associatedcompanyid,
       source,
-      task: tryParseJSON(task),
+      reservationSid,
+      taskSid,
+      taskAttributes,
     });
     response.setBody({
       success: false,

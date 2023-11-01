@@ -73,7 +73,9 @@ class HubspotService extends ApiService {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
         hs_object_id,
         associatedcompanyid,
-        task: this.CircularReferenceJSONStringify(task),
+        taskSid: task.taskSid,
+        reservationSid: task.sid,
+        taskAttributes: task.attributes,
         source: 'Hubspot Service',
       };
 
