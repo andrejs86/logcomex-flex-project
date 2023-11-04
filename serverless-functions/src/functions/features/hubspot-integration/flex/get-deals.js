@@ -26,7 +26,7 @@ exports.handler = async (context, event, callback) => {
       source,
       reservationSid,
       taskSid,
-      taskAttributes,
+      taskAttributes: taskAttributes ? JSON.parse(taskAttributes) : null,
     });
     response.setBody({
       success: false,
@@ -64,7 +64,16 @@ exports.handler = async (context, event, callback) => {
 
         owner = result.data;
       } catch (err) {
-        logger.warn('Warning getting contact deals: owner not found!', { contactDeal, event, err });
+        logger.warn('Warning getting contact deals: owner not found!', {
+          contactDeal,
+          associatedcompanyid,
+          hs_object_id,
+          source,
+          taskSid,
+          reservationSid,
+          taskAttributes: taskAttributes ? JSON.parse(taskAttributes) : null,
+          err,
+        });
       }
 
       deals.contactDeals.push({
@@ -100,7 +109,16 @@ exports.handler = async (context, event, callback) => {
 
           owner = result.data;
         } catch (err) {
-          logger.warn('Warning getting company deals: owner not found!', { companyDeal, event, err });
+          logger.warn('Warning getting company deals: owner not found!', {
+            companyDeal,
+            hs_object_id,
+            associatedcompanyid,
+            source,
+            taskSid,
+            reservationSid,
+            taskAttributes: taskAttributes ? JSON.parse(taskAttributes) : null,
+            err,
+          });
         }
 
         deals.companyDeals.push({
@@ -113,7 +131,15 @@ exports.handler = async (context, event, callback) => {
       }
     }
 
-    logger.info('Deals successfully retrieved', { deals, event });
+    logger.info('Deals successfully retrieved', {
+      deals,
+      hs_object_id,
+      associatedcompanyid,
+      source,
+      taskSid,
+      reservationSid,
+      taskAttributes: taskAttributes ? JSON.parse(taskAttributes) : null,
+    });
     response.setBody({
       success: true,
       deals,
@@ -121,7 +147,15 @@ exports.handler = async (context, event, callback) => {
 
     return callback(null, response);
   } catch (error) {
-    logger.error('Could not retrieve deals', { event, error });
+    logger.error('Could not retrieve deals', {
+      hs_object_id,
+      associatedcompanyid,
+      source,
+      taskSid,
+      reservationSid,
+      taskAttributes,
+      error,
+    });
     response.setBody({ success: false, error });
     return callback(response, null);
   }

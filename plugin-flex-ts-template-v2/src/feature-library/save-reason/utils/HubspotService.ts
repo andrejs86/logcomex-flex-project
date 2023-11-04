@@ -29,6 +29,30 @@ class HubspotService extends ApiService {
     });
   };
 
+  SearchClientByPhone = async (phone: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const encodedParams: EncodedParams = {
+        Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
+        clientEmail: phone,
+        typeSearch: 'phone',
+      };
+
+      const url = `${this.serverlessProtocol}://${this.serverlessDomain}/features/hubspot-integration/flex/search-client`;
+      this.fetchJsonWithReject<any>(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: this.buildBody(encodedParams),
+      })
+        .then((response) => {
+          resolve(response);
+        })
+        .catch((error) => {
+          (window as any).Rollbar.error(`Error searching client`, { url, phone, error });
+          reject(error);
+        });
+    });
+  };
+
   CreateTicket = async (taskAttributes: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
@@ -52,22 +76,8 @@ class HubspotService extends ApiService {
     });
   };
 
-  CircularReferenceJSONStringify = (obj: any) => {
-    let cache: any[] | null = [];
-    // eslint-disable-next-line func-names
-    const str: string = JSON.stringify(obj, function (key, value) {
-      if (typeof value === 'object' && value !== null) {
-        if (cache && cache.indexOf(value) !== -1) return;
-        if (cache) cache.push(value);
-      }
-      // eslint-disable-next-line consistent-return
-      return value;
-    });
-    cache = null;
-    return str;
-  };
-
   GetDeals = async (hs_object_id: any, associatedcompanyid: any, task: any): Promise<any> => {
+    console.log('Get Deals', { hs_object_id, associatedcompanyid, task });
     return new Promise((resolve, reject) => {
       const encodedParams: EncodedParams = {
         Token: encodeURIComponent(this.manager.store.getState().flex.session.ssoTokenPayload.token),
@@ -75,7 +85,7 @@ class HubspotService extends ApiService {
         associatedcompanyid,
         taskSid: task.taskSid,
         reservationSid: task.sid,
-        taskAttributes: task.attributes,
+        taskAttributes: JSON.stringify(task.attributes),
         source: 'Hubspot Service',
       };
 
@@ -89,7 +99,15 @@ class HubspotService extends ApiService {
           resolve(response);
         })
         .catch((error) => {
-          (window as any).Rollbar.error(`Error getting deals`, { task, url, hs_object_id, associatedcompanyid, error });
+          (window as any).Rollbar.error(`Error getting deals`, {
+            taskSid: task.taskSid,
+            reservationSid: task.sid,
+            taskAttributes: task.attributes,
+            url,
+            hs_object_id,
+            associatedcompanyid,
+            error,
+          });
           reject(error);
         });
     });

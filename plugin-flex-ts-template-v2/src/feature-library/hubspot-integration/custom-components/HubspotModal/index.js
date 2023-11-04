@@ -68,7 +68,7 @@ const HubspotModal = ({ worker }) => {
 
   const outboundCall = (phone) => {
     Actions.invokeAction('StartOutboundCall', {
-      destination: `+${phone}`,
+      destination: `${phone}`,
       queueSid: isInternational ? getInternationalQueueSid() : getEveryoneQueueSid(),
     });
 

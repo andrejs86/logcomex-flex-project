@@ -188,7 +188,14 @@ async function createConversaAndCall(
 
     const callObject = await hubspotAxiosInstance.post(`${OBJECTS_URL}/calls`, callProps);
 
-    logger.info('Call and Conversa successfully created.', { logParams, callObject, callProps, conversaObject });
+    logger.info('Call and Conversa successfully created.', {
+      logParams,
+      callObject,
+      callProps,
+      conversaObject,
+      hubspotId,
+      taskAttributes,
+    });
 
     return {
       success: true,

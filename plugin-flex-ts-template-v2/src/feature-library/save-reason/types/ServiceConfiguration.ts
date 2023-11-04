@@ -3,6 +3,12 @@ export default interface SaveReasonConfig {
   typesAndOutcomesDocumentSid: string;
   customObjectConversas: string;
   wrapupTimeout: number;
+  everyoneQueueSid: string;
+  authToken: string;
+  internationalQueueSid: string;
+  internationalNumber: string;
+  nationalNumber: string;
+  flexWorkspaceSid: string;
   reasons: Array<{ topic: string; options: string[] }>;
 }
 

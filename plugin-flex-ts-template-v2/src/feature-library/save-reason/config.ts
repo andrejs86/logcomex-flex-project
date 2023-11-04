@@ -3,6 +3,12 @@ import SaveReasonConfig from './types/ServiceConfiguration';
 
 const {
   enabled = false,
+  everyoneQueueSid = '',
+  internationalQueueSid = '',
+  nationalNumber = '',
+  internationalNumber = '',
+  flexWorkspaceSid = '',
+  authToken = '',
   customObjectConversas = '',
   typesAndOutcomesDocumentSid = '',
   wrapupTimeout = 120,
@@ -22,8 +28,32 @@ export const isFeatureEnabled = () => {
   return enabled;
 };
 
+export const getNationalNumber = () => {
+  return nationalNumber;
+};
+
+export const getEveryoneQueueSid = () => {
+  return everyoneQueueSid;
+};
+
+export const getInternationalQueueSid = () => {
+  return internationalQueueSid;
+};
+
 export const getReasonsByTopic = (topic: string) => {
   return reasons.find((r) => r.topic === topic)?.options;
+};
+
+export const getAuthToken = () => {
+  return authToken;
+};
+
+export const getInternationalNumber = () => {
+  return internationalNumber;
+};
+
+export const getFlexWorkspaceSid = () => {
+  return flexWorkspaceSid;
 };
 
 export const getAllReasons = () => {
