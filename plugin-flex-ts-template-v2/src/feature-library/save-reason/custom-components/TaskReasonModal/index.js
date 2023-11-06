@@ -119,13 +119,21 @@ const TaskReasonModal = (props) => {
 
       let taskDetails = 'Sem descrição de atendimento informada ou não foi possível salvar os dados';
       if (newEmail !== '') {
-        window.Rollbar.debug('Getting new Client information', { newEmail, task });
+        window.Rollbar.debug('Getting new Client information', { newEmail, taskAttributes: task.attributes });
         const clientInformationReturn = await HubspotService.GetNewClientInformation(newEmail);
         if (clientInformationReturn && clientInformationReturn.data && clientInformationReturn.data.properties) {
           task.attributes.clientInformation = clientInformationReturn.data.properties;
-          window.Rollbar.debug('Got new Client information', { newEmail, task, clientInformationReturn });
+          window.Rollbar.debug('Got new Client information', {
+            newEmail,
+            taskAttributes: task.attributes,
+            clientInformationReturn,
+          });
         } else {
-          window.Rollbar.warn('Could not get new Client information', { newEmail, task, clientInformationReturn });
+          window.Rollbar.warn('Could not get new Client information', {
+            newEmail,
+            taskAttributes: task.attributes,
+            clientInformationReturn,
+          });
           setAlertContactNotFound(
             'Contato não encontrado no Hubspot, por favor informe o e-mail de um contato cadastrado.',
           );
