@@ -121,8 +121,8 @@ const TaskReasonModal = (props) => {
       if (newEmail !== '') {
         window.Rollbar.debug('Getting new Client information', { newEmail, task });
         const clientInformationReturn = await HubspotService.GetNewClientInformation(newEmail);
-        if (clientInformationReturn) {
-          task.attributes.clientInformation = clientInformationReturn;
+        if (clientInformationReturn && clientInformationReturn.data && clientInformationReturn.data.properties) {
+          task.attributes.clientInformation = clientInformationReturn.data.properties;
           window.Rollbar.debug('Got new Client information', { newEmail, task, clientInformationReturn });
         } else {
           window.Rollbar.warn('Could not get new Client information', { newEmail, task, clientInformationReturn });
